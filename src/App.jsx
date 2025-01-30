@@ -4,7 +4,7 @@ import Login from './screens/login';
 import Dashboard from './screens/dashboard';
 import Navbar from './components/NavBar';
 import PrivateRoute from './components/PrivateRoute';
-
+import Look from './screens/look';
 function App() {
   return (
     <Router>
@@ -25,6 +25,7 @@ function Main() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
+          <Route path="/look" element={<PrivateRoute element={<Look />} />} />
         </Routes>
       </div>
     </div>

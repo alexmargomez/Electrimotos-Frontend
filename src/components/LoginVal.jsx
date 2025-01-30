@@ -81,10 +81,7 @@ function LoginForm() {
   );
 }
 
-function Logout() {
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
+const Logout = (navigate) => async() =>{
     const token = localStorage.getItem('authToken');
     
     // Verificamos si el token existe antes de intentar hacer la solicitud
@@ -113,14 +110,7 @@ function Logout() {
     } catch (error) {
       console.error('Error en la solicitud:', error);
     }
-  };
-
-  return (
-    <button onClick={handleLogout} className="py-2 bg-red-500 text-gray-800 rounded-lg hover:bg-red-600">
-      Cerrar sesión
-    </button>
-  );
-}
-
+};
+  
 
 export { LoginForm, Logout };

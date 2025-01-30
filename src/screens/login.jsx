@@ -5,7 +5,7 @@ function LoginScreen() {
   return (
     <div className="login-screen flex justify-center items-center ">
       <div className="login-container max-w-sm mx-auto mt-10 p-6 border rounded-lg shadow-lg ">
-        <h2 className="text-2xl font-semibold mb-4 text-center">Iniciar sesión</h2>
+        <h1 className=" font-semibold mb-4 text-center text-3xl">Iniciar sesión</h1>
         <LoginForm /> 
       </div>
     </div>
