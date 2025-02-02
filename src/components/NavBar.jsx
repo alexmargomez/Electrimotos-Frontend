@@ -10,20 +10,13 @@ import { FaDoorClosed, FaDoorOpen } from "react-icons/fa";
 import { Logout } from './LoginVal';
 import { MdDashboard, MdOutlineDashboard, MdOutlinePointOfSale } from "react-icons/md";
 
-
-
 const NavBar = () => {
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
-  const [isLookOpen, setIsLookOpen] = useState(false);
-  const [isSalesOpen, setIsSalesOpen] = useState(false);
-  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
-  const [isClientsOpen, setIsClientsOpen] = useState(false);
-  const [isVehiclesOpen, setIsVehiclesOpen] = useState(false);
-  const [isReportsOpen, setIsReportsOpen] = useState(false);
+  const [hoveredIcon, setHoveredIcon] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  const [hoveredIcon, setHoveredIcon] = useState(null);
+  
 
   const Icons = [
     { icon: HiOutlineDocumentMagnifyingGlass, route: "/look" },
@@ -61,7 +54,7 @@ const NavBar = () => {
             >
               <div
                 className={`transition-all duration-100 p-2 rounded-full ${
-                  hoveredIcon === index ? 'bg-[#FFD700] border-2 border-[#FFD700]' : 'bg-transparent'
+                  hoveredIcon === index ? 'bg-[#FFA500]' : 'bg-transparent'
                 }`}
               >
                 <item.icon className="text-white text-2xl" />

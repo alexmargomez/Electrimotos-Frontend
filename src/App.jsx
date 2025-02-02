@@ -5,6 +5,9 @@ import Dashboard from './screens/dashboard';
 import Navbar from './components/NavBar';
 import PrivateRoute from './components/PrivateRoute';
 import Look from './screens/look';
+import Sale from './screens/sale'
+
+
 function App() {
   return (
     <Router>
@@ -26,6 +29,7 @@ function Main() {
           <Route path="/" element={<Login />} />
           <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
           <Route path="/look" element={<PrivateRoute element={<Look />} />} />
+          <Route path="/sales" element={<PrivateRoute element={<Sale />} />} />
         </Routes>
       </div>
     </div>
