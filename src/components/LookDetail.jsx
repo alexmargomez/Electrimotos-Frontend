@@ -1,50 +1,80 @@
 import React, { useState, useEffect } from 'react';
 
-const LookDetail = () => {
-    const [customers, setCustomers] = useState([]);  // Estado para los clientes
+const LookDetail = ({ selectedOption }) => {
+    const [data, setData] = useState([]);  // Estado para los clientes
     const [loading, setLoading] = useState(true);   // Estado para manejar la carga de datos
     const token = localStorage.getItem('authToken');
 
     useEffect(() => {
-      const fetchCustomers = async () => {
+      const fetchData = async () => {
         try {
-          const response = await fetch('http://localhost:8000/api/customers/', {
+          let endpoint = '';
+
+        // Determinar la API según la opción seleccionada
+        switch (selectedOption) {
+          case 'Productos':
+            endpoint = 'products';
+            break;
+          case 'Clientes':
+            endpoint = 'customers';
+            break;
+          case 'Vehiculos':
+            endpoint = 'vehicles';
+            break;
+          case 'Ventas':
+            endpoint = 'sales';
+            break;
+          case 'Movimientos':
+            endpoint = 'inventory-movements';
+            break;
+          default:
+            return;
+        }
+          const response = await fetch(`http://api.factupos.me:8000/api/${endpoint}/`, {
             headers: {
               'Authorization': `Bearer ${token}`,  // Corregido 'Authorization'
             }
           });
-
-          const data = await response.json();  // Convierte la respuesta en JSON
-          console.log(data); 
-          setCustomers(data);  // Guarda los clientes en el estado
-          setLoading(false);  // Cambia el estado de carga a false
+          const result = await response.json();  // Convierte la respuesta en JSON
+          setData(result);  // Guarda los clientes en el estado
+          console.log(`Datos de ${selectedOption}:`, result);
         } catch (error) {
-          console.error('Error al obtener los clientes:', error);
+          console.error(`Error al obtener los ${selectedOption.toLowerCase()}:`, error);
+        } finally {
           setLoading(false);
         }
       };
       
-      fetchCustomers();
-    }, [token]);  // Añadido 'token' al array de dependencias de useEffect
+      fetchData();
+    }, [selectedOption, token]);  // Añadido 'token' al array de dependencias de useEffect
   
     // Si está cargando, muestra un mensaje
     if (loading) {
-      return <div>Cargando clientes...</div>;
+      return <div>Cargando {selectedOption}...</div>;
     }
   
     // Si no hay clientes, muestra un mensaje
-    if (customers.length === 0) {
-      return <div>No hay clientes disponibles.</div>;
+    if (data.length === 0) {
+      return <div>No hay {selectedOption.toLowerCase()} disponibles.</div>;
     }
   
     return (
-      <div className="flex flex-wrap justify-between gap-4">
+      <div className="flex flex-col gap-4 ">
         {/* Recorremos los clientes y los mostramos en tarjetas */}
-        {customers.map((customer) => (
-          <div key={customer.id} className="flex flex-col w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 border p-4">
-            <h3 className="text-xl font-semibold">{customer.name}</h3>
-            <p>{customer.phone}</p>
-            <p className="text-green-500">{customer.email}</p>
+        {data.map((item) => (
+          <div key={item.id} className="flex w-full border p-2 justify-between pl-8 pr-8">
+            <div className='flex justify-center items-center space-x-10 '>
+            
+              <h3 className="text-xl font-semibold">{item.name ? `Nombre: ${item.name}` :item.make ? `Marca: ${item.make}`  : `ID: ${item.id}`}</h3>
+              <p>{item.phone ? `Telefono: ${item.phone}`: item.price ? `Precio: ${item.price}` : item.plate ? `Placa: ${item.plate}` : ' '}</p>
+              <p className="text-green-500">{item.email ? `Email: ${item.email}` : item.model ? ` Modelo: ${item.model}` : ' '}</p>
+            </div>
+            <div className='flex justify-center items-center space-x-5'>
+                <button type='button' className='rojo'>Eliminar</button>
+                <button type="button">Modificar</button>
+                
+            </div>
+            
           </div>
         ))}
       </div>

@@ -10,18 +10,16 @@ function LoginForm() {
   const login = async (name, password) => {
     const loginData = { name, password }; // Enviamos 'name' tal cual lo espera la API
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/login', {
+      const response = await fetch('http://api.factupos.me:8000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData),
       });
 
       const data = await response.json();
-      console.log('Respuesta de la API:', data);
       if (response.ok) {
         const token = data.access_token;
         localStorage.setItem('authToken', token); // Guardamos el token en localStorage
-        console.log('Token guardado en localStorage:', localStorage.getItem('authToken'));
         navigate('/dashboard'); // Redirigimos a la página de dashboard
 
       }
@@ -91,7 +89,7 @@ const Logout = (navigate) => async() =>{
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/logout', {
+      const response = await fetch('http://api.factupos.me:8000/api/logout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

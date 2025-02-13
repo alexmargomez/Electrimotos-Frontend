@@ -7,10 +7,10 @@ import { PiMotorcycleFill } from "react-icons/pi";
 import DateTimeDisplay from '../components/DateTimeDisplay';
 import { useNavigate } from 'react-router-dom';
 
-const dashboard = () => {
+const Dashboard = () => {
   const navigate = useNavigate();
   const blocks = [
-    { bgColor: "#00CED1 ", number: "1", name: "Facturas", icon: <FaFileInvoiceDollar /> },
+    { bgColor: "#00CED1 ", number: "1", name: "Ventas", icon: <FaFileInvoiceDollar /> },
     { bgColor: "#FF6F61 ", number: "2", name: "Inventario", icon: <MdOutlineInventory /> },
     { bgColor: "#00CED1 ", number: "4", name: "Clientes", icon: <FaUsersViewfinder /> },
     { bgColor: "#FF6F61 ", number: "3", name: "Vehiculos", icon: <PiMotorcycleFill /> },
@@ -52,4 +52,4 @@ const dashboard = () => {
   );
 }
 
-export default dashboard;
+export default Dashboard;

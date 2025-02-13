@@ -32,7 +32,11 @@ body {
 }
 
 .custom-button {
-  background-color: #f1eae8 !important;
+  background-color: #dddddd !important;
+}
+
+.rojo {
+  background-color: rgb(236, 68, 68) !important;
 }
 
 button {

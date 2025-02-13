@@ -2,8 +2,7 @@ import React from 'react'
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { AiFillProduct } from "react-icons/ai";
-import { FaUsersRays } from "react-icons/fa6";
-import { PiMotorcycleFill } from "react-icons/pi";
+import { FaBookBookmark } from "react-icons/fa6";
 import { HiDocumentReport } from "react-icons/hi";
 import { HiOutlineDocumentMagnifyingGlass } from "react-icons/hi2";
 import { FaDoorClosed, FaDoorOpen } from "react-icons/fa";
@@ -19,11 +18,10 @@ const NavBar = () => {
   
 
   const Icons = [
-    { icon: HiOutlineDocumentMagnifyingGlass, route: "/look" },
+    { icon: FaBookBookmark, route: "/schedule" },
     { icon: MdOutlinePointOfSale, route: "/sales" },
     { icon: AiFillProduct, route: "/inventory" },
-    { icon: FaUsersRays, route: "/clients" },
-    { icon: PiMotorcycleFill, route: "/vehicles" },
+    { icon: HiOutlineDocumentMagnifyingGlass, route: "/look" },
     { icon: HiDocumentReport, route: "/reports" },
   ];
   
@@ -36,8 +34,7 @@ const NavBar = () => {
           onClick={ () => navigate("/dashboard")}
         >    
           {isDashboardOpen ? (
-            <MdDashboard className="text-white text-3xl" /> 
-            
+            <MdDashboard className="text-white text-3xl" />   
           ):(
             <MdOutlineDashboard className="text-white text-3xl" />
           )}
@@ -57,7 +54,7 @@ const NavBar = () => {
                   hoveredIcon === index ? 'bg-[#FFA500]' : 'bg-transparent'
                 }`}
               >
-                <item.icon className="text-white text-2xl" />
+                <item.icon className="text-white text-3xl" />
               </div>
             </div>
           ))}
@@ -70,9 +67,9 @@ const NavBar = () => {
           onClick={Logout(navigate)}
         >
           {isOpen ? (
-            <FaDoorOpen className="text-white text-2xl transition-all duration-300" />
+            <FaDoorOpen className="text-white text-3xl transition-all duration-300" />
           ) : (
-            <FaDoorClosed className="text-white text-2xl transition-all duration-300" />
+            <FaDoorClosed className="text-white text-3xl transition-all duration-300" />
           )}
          
         </div>
