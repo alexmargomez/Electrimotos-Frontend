@@ -10,53 +10,69 @@ const Schedule = () => {
       </div>
       <div className="p-5 m-4 h-full bg-white rounded-sm shadow-xl mt-0 border-t-3 border-[#FFD700]">
         <div className='flex flex-wrap h-full w-full justify-center items-center '>
-          
-          <section className='flex w-full h-2/10 border-b-2 border-gray-500 pb-4 shadow-xl'>
-            <div className='flex items-center justify-center w-1/5'>
-              <h2 className='text-4xl'>Usuario</h2>
+
+          <section className='h-3/11 w-full flex  shadow-xl'> {/* datos de factura */}
+            <div className='w-1/2 flex flex-col'>
+              <h2 className='text-2xl h-1/4'>Cliente</h2>
+              <div className=' h-3/4 pl-10 pr-10 flex flex-col justify-center items-center pb-5'>
+                <input type="text" placeholder="Nombre" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
+                <input type="text" placeholder="C.C" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
+                <input type="text" placeholder="Número" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
+                <input type="email" placeholder="Email" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
+              
+              </div>
             </div>
-            <div className='flex flex-col items-center justify-center w-4/5 space-y-2 pr-4' >
-              <input type="text" placeholder="Nombre" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="text" placeholder="C.C" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="text" placeholder="Número" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="email" placeholder="Email" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
+            <div className='w-1/2'>
+              <h2 className='text-2xl h-1/4'>Vehiculo</h2>
+              <div className=' h-3/4 pl-10 pr-10 flex flex-col justify-center items-center pb-5'>
+                <input type="text" placeholder="Placa" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
+                <input type="text" placeholder="Marca" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
+                <input type="text" placeholder="Modelo" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
+              
+              </div>
             </div>
           </section>
 
-          <section className='flex w-full h-2/10 border-b-2 border-gray-500 shadow-xl'>
-            <div className='flex items-center justify-center w-1/5'>
-              <h2 className='text-4xl'>Vehículo</h2>
+        {/*Servicio*/} 
+          <section className='flex w-full h-7/11  shadow-xl space-x-2'> 
+            <div className=' flex flex-col justify-center items-center w-1/2 h-full border-2 border-[#494A8A] rounded-sm'>
+              <div className=' flex h-1/10  space-x-10 bg-[#494A8A] w-full justify-center items-center'>
+                <h2 className='text-white text-2xl'>Servicios</h2>
+              </div>
+
+              <div className='flex flex-col items-center justify-center p-4 space-y-5  h-9/10 w-full'>
+                <textarea 
+                  placeholder="Descripción del servicio" 
+                  className='w-full h-5/6 border-1 rounded-sm border-gray-500 outline-none placeholder-gray-500 resize-none p-2' rows="3"
+                />  
+                <div className=' bg-[#494A8A] h-1/6 w-full flex justify-center items-center rounded-md text-white text-2xl'>
+                  Agregar
+                </div>
+              </div>
             </div>
-            <div className='flex flex-col items-center justify-center w-4/5 space-y-2 pr-4'>
-              <input type="text" placeholder="Placa" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="text" placeholder="Marca" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="text" placeholder="Modelo" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
+           
+            <div className='w-1/2 h-full border-2 border-[#494A8A] rounded-sm'>
+              <div className='flex h-1/10 bg-[#494A8A] justify-center items-center'>
+                <h2 className='text-white text-2xl'>Servicios Agregados</h2>
+              </div>
+              <div className='flex flex-col items-center justify-baseline p-4 space-y-2  h-9/10 w-full'> 
+                {/*Se mostrarán los servicios agregados*/}
+                <ul>
+                  <li>Se muestra el Servicio 1</li>
+                  <li>Se muestra el Servicio 2</li>
+                  <li>Se muestra el Servicio 3</li>
+                  <li>ETC...</li>
+                </ul>
+              </div>
+              
             </div>
           </section>
 
-          <section className='flex w-full h-2/10 border-b-2 border-gray-500 shadow-xl '>
-            <div className='flex items-center justify-center w-1/5 '>
-              <h2 className='text-4xl'>Servicio</h2>
+          {/*Agendar*/}
+          <section className=' h-1/11 flex w-full pt-2 '>
+            <div className=' bg-[#494A8A] h-full w-full flex justify-center items-center rounded-md text-white text-2xl'>
+              Agendar
             </div>
-            <div className='flex flex-col items-center justify-center w-4/5 p-3 pl-0 space-y-1 pr-4'>
-              <textarea placeholder="Descripción del servicio" className='w-full h-3/5 border-1 rounded-sm border-gray-500 outline-none placeholder-gray-500 resize-none pl-1' rows="3"></textarea>
-              <button className='h-2/5 w-full rounded-sm custom-button'>Agregar</button>
-            </div>
-          </section>
-
-          <section className=' w-full flex flex-col justify-between items-center h-3/10 shadow-xl'>
-            <div className='flex flex-col items-center justify-center w-full h-4/5 '>
-              <p>Se mostrarán los servicios agregados</p>
-              <ul>
-                <li>Servicio 1</li>
-                <li>Servicio 2</li>
-                <li>Servicio 3</li>
-              </ul>
-            </div>
-            
-          </section>
-          <section className=' h-1/10 flex justify-center items-center w-full'>
-            <button className='w-full shadow-xl custom-button'>Agendar</button>
           </section>
           
         </div>

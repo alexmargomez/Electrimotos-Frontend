@@ -7,7 +7,6 @@ import PrivateRoute from './components/PrivateRoute';
 import Look from './screens/look';
 import Sale from './screens/sale'
 import Inventory from './screens/inventory';
-import Customer from './screens/customer';
 import Schedule from './screens/schedule';
 import Report from './screens/report';
 
@@ -35,7 +34,6 @@ function Main() {
           <Route path="/look" element={<PrivateRoute element={<Look />} />} />
           <Route path="/sales" element={<PrivateRoute element={<Sale />} />} />
           <Route path="/inventory" element={<PrivateRoute element={<Inventory />} />} />
-          <Route path="/customers" element={<PrivateRoute element={<Customer />} />} />
           <Route path="/schedule" element={<PrivateRoute element={<Schedule />} />} />
           <Route path="/reports" element={<PrivateRoute element={<Report />} />} />
         </Routes> 
