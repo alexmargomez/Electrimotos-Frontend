@@ -23,6 +23,13 @@ const Inventory = () => {
           },
           body: JSON.stringify(productData),
         });
+        if (response.ok) {
+          const newProduct = await response.json();
+          setProducts([...products, newProduct]);
+          setView('main'); // Cambia la vista después de añadir el producto
+        } else {
+          console.error('Error al hacer la solicitud', response.statusText);
+        }
       } catch (error) {
         console.error('Error al hacer la solicitud', error);
       }
@@ -67,7 +74,7 @@ const Inventory = () => {
               />
               */}
               <input 
-                type="text" 
+                type="number" 
                 value={category_id} 
                 placeholder="Categoria" 
                 className="w-full p-2 border rounded"

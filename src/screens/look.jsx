@@ -64,7 +64,7 @@ const Look = () => {
         <button className=' w-2/10 focus:outline-none custom-button border-2 border-gray-300'>Buscar</button>
         
       </div>
-      <div className=' h-screen  m-4 mt-2 rounded-sm bg-white shadow-2xl p-4'>
+      <div className=' h-screen  m-4 mt-2 rounded-sm bg-white shadow-2xl p-4 overflow-y-auto'>
         <LookDetail selectedOption={selectedOption} />
       </div>
     </div>

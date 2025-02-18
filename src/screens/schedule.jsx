@@ -89,15 +89,16 @@ const Schedule = () => {
             </div>
           </section>
 
-          {/*Agendar*/}
-          <section className=' h-1/11 flex w-full pt-2 '>
-            <div className=' bg-[#494A8A] h-full w-full flex justify-center items-center rounded-md text-white text-2xl'>
+
+          {/* Agendar */}
+          <section className="w-full pt-2">
+            <div className="bg-[#494A8A] h-12 w-full flex justify-center items-center rounded-md text-white text-2xl cursor-pointer">
               Agendar
             </div>
           </section>
-          
+
         </div>
-      </div> 
+      </div>
     </div>
   );
 };

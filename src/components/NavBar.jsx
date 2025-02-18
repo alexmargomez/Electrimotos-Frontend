@@ -28,7 +28,7 @@ const NavBar = () => {
   return (
     <div className="bg-[#494A8A]  h-screen w-1/17 flex flex-col">
         <div 
-          className='flex flex-col h-1/10 items-center justify-center'
+          className='flex flex-col h-1/10 items-center justify-center cursor-pointer'
           onMouseEnter={() => setIsDashboardOpen(true)}
           onMouseLeave={() => setIsDashboardOpen(false)}
           onClick={ () => navigate("/dashboard")}
@@ -61,7 +61,7 @@ const NavBar = () => {
         </div>
           
         <div
-          className="flex flex-col h-1/10 items-center justify-center transition-all duration-300"
+          className="flex flex-col h-1/10 items-center justify-center transition-all duration-300 cursor-pointer"
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
           onClick={Logout(navigate)}
