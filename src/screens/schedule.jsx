@@ -79,7 +79,7 @@ const Schedule = () => {
               <div className='flex flex-col flex-grow h-9/10 overflow-hidden'>
                 <div className='flex flex-col items-center justify-start p-4 space-y-2 h-full w-full overflow-y-auto max-h-[400px]'>
                   {services.map((service, index) => (
-                    <div key={index} className='p-1 pr-3 pl-3 flex justify-between items-center w-full border-1 rounded-sm flex-shrink-0'>
+                    <div key={index} className='p-1 pr-3 pl-3 flex justify-between items-center w-full border-1 rounded-sm '>
                       <h3 className='text-2xl'>{service}</h3>
                       <button className='rojo text-white rounded-md p-1' onClick={() => removeService(index)}>Eliminar</button>
                     </div>

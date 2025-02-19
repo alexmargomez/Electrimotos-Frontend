@@ -1,13 +1,35 @@
 import React from 'react'
 import DateTimeDisplay from '../components/DateTimeDisplay';
 import { useState } from 'react';
+import LookProduct from '../components/LookProduct';  
+import { MdDescription } from 'react-icons/md';
 
 const Sale = () => {
+  const [services, setServices] = React.useState([]); // Estado para los servicios  
+  const [serviceInput, setServiceInput] = React.useState(''); // Estado para el input de servicio
+  const [serviceValue, setServiceValue] = React.useState(''); // Estado para el valor del servicio
   const [activeTab, setActiveTab] = React.useState('producto');
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);  
   };
+
+  const addService = () => {
+    if (serviceInput.trim() !== '' && serviceValue.trim() !== '') {
+      const newService = { description: serviceInput, value: serviceValue };
+      setServices([...services, newService]);
+      setServiceInput('');
+      setServiceValue('');
+    }
+  }
+
+  const removeService = (index) => {
+    setServices(services.filter((service, i) => i !== index));
+  }
+
+  const addProduct = (product) => {
+    setServices([...services, product]);
+  }
 
   return (
     <div className='h-screen w-full flex flex-col bg-gray-200'>
@@ -43,14 +65,14 @@ const Sale = () => {
           <div className='w-1/2 h-full border-2 border-[#494A8A] rounded-sm'> {/*Busqueda de producto o servicio*/}
             <div className='flex h-1/10 bg-[#494A8A] '> {/*Barra de busqueda*/}
               <div 
-                className={' px-4 py-2 cursor-pointer w-1/2 flex justify-end items-center hover:bg-white text-white hover:text-[#494A8A] border-r-2 border-white hover:rounded-tl-sm'}  
+                className={`px-4 py-2 cursor-pointer w-1/2 flex justify-end items-center border-r-2 border-white rounded-tl-sm ${activeTab === 'producto' ? 'bg-white text-[#494A8A]' : 'hover:bg-white hover:text-[#494A8A] text-white'}`}
                 onClick={() => handleTabClick('producto')}
               >
                 <h2 className=' text-2xl '>Productos</h2>
               </div>
 
               <div
-                className={'px-4 py-2 cursor-pointer w-1/2 flex justify-between items-center hover:bg-white text-white hover:text-[#494A8A] hover:rounded-tr-sm'} 
+                className={`px-4 py-2 cursor-pointer w-1/2 flex justify-between items-center rounded-tr-sm ${activeTab === 'servicio' ? 'bg-white text-[#494A8A]' : 'hover:bg-white hover:text-[#494A8A] text-white'}`}
                 onClick={() => handleTabClick('servicio')}
               >
                 <h2 className=' text-2xl'>Servicio</h2>
@@ -59,7 +81,7 @@ const Sale = () => {
             </div>
             <div className='p-4 h-9/10 w-full '> {/*Contenido de producto o servicio*/}
               {activeTab === 'producto' ? (
-                <div className='flex flex-col space-y-2 w-full h-full'>
+                <div className='flex flex-col space-y-2 w-full h-full '>
                   <div className='flex justify-center items-center h-1/7 w-full pr-6 pl-6'>
                     <input 
                       type="text"
@@ -67,24 +89,8 @@ const Sale = () => {
                       className=' focus:outline-none w-full border-b-1 border-gray-500 outline-none placeholder-gray-500'
                     />
                   </div>
-                  <div className='p-2 flex items-start h-6/7 w-full rounded-sm shadow-sm'>
-                    <div className='p-1 pr-3 pl-3 flex justify-between items-center w-full border-1 rounded-sm'>
-                      <h3 className='text-2xl'>Productos</h3>
-                      <div className='flex items-center space-x-2'>
-                        <label htmlFor='unidades' className='text-lg'>Unidades:</label>
-                        <input 
-                          type='number' 
-                          id='unidades' 
-                          name='unidades' 
-                          min='1' 
-                          className='border-2 border-gray-300 rounded-md p-1 w-12 text-center'
-                          placeholder='0'
-                        />
-
-                        <button className='rojo text-white rounded-md p-1'>Agregar</button>
-                      </div>
-                      
-                    </div>
+                  <div className='p-2 flex justify-center items-start m-4 mt-2 bg-white overflow-y-auto max-h-[300px] h-6/7  w-full rounded-sm shadow-sm'>
+                    <LookProduct addProduct={addProduct}/>
                   </div>
                 </div>
 
@@ -93,13 +99,20 @@ const Sale = () => {
                   <textarea 
                     placeholder="Descripción del servicio" 
                     className='w-full h-5/6 border-1 rounded-sm border-gray-500 outline-none placeholder-gray-500 resize-none p-2' rows="3"
+                    value={serviceInput}
+                    onChange={(e) => setServiceInput(e.target.value)}
                   />       
                   <input 
                   type="text " 
                   placeholder="Valor"
                   className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1'
+                  value={serviceValue}
+                  onChange={(e) => setServiceValue(e.target.value)}
                   />       
-                  <div className=' bg-[#494A8A] h-1/6 w-full flex justify-center items-center rounded-md text-white text-2xl'>
+                  <div 
+                  className=' bg-[#494A8A] h-1/6 w-full flex justify-center items-center rounded-md text-white text-2xl cursor-pointer'
+                  onClick={addService}
+                  >
                     Agregar
                   </div>
                 </div>
@@ -111,7 +124,12 @@ const Sale = () => {
               <h2 className='text-white text-2xl'>Facturación</h2>
             </div>
             <div className='flex flex-col items-center justify-baseline p-4 space-y-2  h-9/10 w-full'>
-
+              {services.map((service, index) => (
+                <div key={index} className='p-1 pr-3 pl-3 flex justify-between items-center w-full border-1 rounded-sm '>
+                  <h3 className='text-2xl'>{service.name ? `${service.name} - ${service.price}` : `${service.description} - ${service.value}`}</h3>
+                  <button className='rojo text-white rounded-md p-1' onClick={() => removeService(index)}>Eliminar</button>
+                </div>
+              ))}
             </div>
           </div>
           

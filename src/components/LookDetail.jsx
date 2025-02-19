@@ -46,8 +46,54 @@ const LookDetail = ({ selectedOption }) => {
       };
       
       fetchData();
+      const interval = setInterval(fetchData, 100);
+      
+      return () => clearInterval(interval);
     }, [selectedOption, token]);  // Añadido 'token' al array de dependencias de useEffect
   
+    const handleDelete = async (id) => {
+      try {
+        let endpoint = '';
+
+        switch (selectedOption) {
+          case 'Productos':
+            endpoint = 'products';
+            break;
+          case 'Clientes':
+            endpoint = 'customers';
+            break;
+          case 'Vehiculos':
+            endpoint = 'vehicles';
+            break;
+          case 'Ventas':
+            endpoint = 'sales';
+            break;
+          case 'Movimientos':
+            endpoint = 'inventory-movements';
+            break;
+          default:
+            return;
+        }
+
+        const response = await fetch(`http://api.factupos.me:8000/api/${endpoint}/${id}/`, {
+          method: 'DELETE',
+          headers: {  // Corregido 'Authorization'
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        if (response.status === 204) {
+          // Eliminar el elemento del estado
+          setData(data.filter(item => item.id !== id));
+          console.log(`${selectedOption} eliminado con éxito`);
+        } else {
+            console.error(`Error al eliminar ${selectedOption.toLowerCase()}:`, response.status);
+        }
+      }
+      catch (error) { // Añadido manejo de errores
+        console.error(`Error al eliminar el elemento:`, error);
+      }
+    };
+
     // Si está cargando, muestra un mensaje
     if (loading) {
       return <div>Cargando {selectedOption}...</div>;
@@ -58,6 +104,8 @@ const LookDetail = ({ selectedOption }) => {
       return <div>No hay {selectedOption.toLowerCase()} disponibles.</div>;
     }
   
+
+
     return (
       <div className="flex flex-col gap-4 ">
         {/* Recorremos los clientes y los mostramos en tarjetas */}
@@ -70,7 +118,7 @@ const LookDetail = ({ selectedOption }) => {
               <p className="text-green-500">{item.email ? `Email: ${item.email}` : item.model ? ` Modelo: ${item.model}` : ' '}</p>
             </div>
             <div className='flex justify-center items-center space-x-5'>
-                <button type='button' className='rojo'>Eliminar</button>
+                <button type='button' className='rojo ' onClick={() => handleDelete(item.id)}>Eliminar</button>
                 <button type="button">Modificar</button>
                 
             </div>
