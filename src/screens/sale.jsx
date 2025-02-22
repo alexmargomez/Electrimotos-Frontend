@@ -1,15 +1,109 @@
 import React from 'react'
 import DateTimeDisplay from '../components/DateTimeDisplay';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LookProduct from '../components/LookProduct';  
-import { MdDescription } from 'react-icons/md';
 
 const Sale = () => {
+  const token = localStorage.getItem('authToken');
   const [services, setServices] = React.useState([]); // Estado para los servicios  
   const [serviceInput, setServiceInput] = React.useState(''); // Estado para el input de servicio
   const [serviceValue, setServiceValue] = React.useState(''); // Estado para el valor del servicio
   const [activeTab, setActiveTab] = React.useState('producto');
+  const [clientValues, setClientValues] = useState({
+    name: '',
+    cc: '',
+    phone: '',
+    email: ''
+  });
+  const [clientOptions, setClientOptions] = useState({
+    name: [],
+    cc: [], 
+    phone: [],
+    email: []
+  });
+  const [vehicleValues, setVehicleValues] = useState({
+    plate: '',  
+    make: '',
+    model: ''
+  });
+  const [vehicleOptions, setVehicleOptions] = useState({  
+    plate: [],
+    make: [],
+    model: []
+  });
+  
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        const response = await fetch('http://api.factupos.me:8000/api/customers', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        const result = await response.json();
+        // Almacena los productos en el estado
+        const clientOpts = {
+          name: result.map(client => client.name),
+          cc: result.map(client => client.id),
+          phone: result.map(client => client.phone),
+          email: result.map(client => client.email)
+        };
+        setClientOptions(clientOpts);
+        console.log('Clientes:', result);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    
+    const fetchVehicle = async () => {
+      try {
+        const response = await fetch('http://api.factupos.me:8000/api/vehicles', {
+          headers: {
+          'Authorization': `Bearer ${token}`,
+          }
+        });
+        const result = await response.json();
+        const vehicleOpts = {
+          plate: result.map(vehicle => vehicle.plate),
+          make: result.map(vehicle => vehicle.make),
+          model: result.map(vehicle => vehicle.model)
+        };
+        setVehicleOptions(vehicleOpts);
+        console.log('Vehículos:', result);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+  
+    fetchVehicle();
+    fetchCustomer();
+  }, [token]);
+  
+  const handleVehicleChange = (field, value) => { 
+    setVehicleValues((prev) => ({ ...prev, [field]: value }));
+  }
+  const handleVehicleBlur = (field) => {  
+    if (vehicleValues[field] && !vehicleOptions[field].includes(vehicleValues[field])) {
+      setVehicleOptions((prev) => ({  
+        ...prev,
+        [field]: [...prev[field], vehicleValues[field]]
+      }));
+    }
+  }
+  
+  const handleClientChange = (field, value) => {
+    setClientValues((prev) => ({ ...prev, [field]: value }));
+  };
+  const handleClientBlur = (field) => {
+    if (clientValues[field] && !clientOptions[field].includes(clientValues[field])) {
+      setClientOptions((prev) => ({
+        ...prev,
+        [field]: [...prev[field], clientValues[field]]
+      }));
+    }
+  };
 
+  
   const handleTabClick = (tab) => {
     setActiveTab(tab);  
   };
@@ -39,27 +133,56 @@ const Sale = () => {
       </div>
       <div className="p-5 m-4 h-full bg-white rounded-sm shadow-xl mt-0 border-t-3 border-[#FFD700] flex flex-wrap">
 
-        <section className='h-3/11 w-full flex shadow-2xl mb-2 rounded-lg'> {/* datos de factura */}
-          <div className='w-1/2 flex flex-col'>
-            <h2 className='text-2xl h-1/4 pt-3 text-[#494A8A] font-bold'>Cliente</h2>
-            <div className=' h-3/4 pl-10 pr-10 flex flex-col justify-center items-center pb-5'>
-              <input type="text" placeholder="Nombre" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="text" placeholder="C.C" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="text" placeholder="Número" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="email" placeholder="Email" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-            
+      <section className='h-3/11 w-full flex shadow-2xl mb-2 rounded-lg'>
+            <div className='w-1/2 flex flex-col'>
+              <h2 className='text-2xl h-1/4 p-3 text-[#494A8A] font-bold'>Cliente</h2>
+              <div className='h-3/4 pl-10 pr-10 flex flex-col justify-center items-center pb-5'>
+                {Object.keys(clientValues).map((field, index) => (
+                  <div key={index} className='relative w-full'>
+                    <input
+                      type={field === "email" ? "email" : "text"}
+                      placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                      list={field}
+                      value={clientValues[field]}
+                      onChange={(e) => handleClientChange(field, e.target.value)}
+                      onBlur={() => handleClientBlur(field)}
+                      className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1'
+                    />
+                    <datalist id={field} >
+                      {clientOptions[field].map((option, id) => (
+                        <option key={id} value={option} />
+                      ))}
+                    </datalist>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className='w-1/2'>
-            <h2 className='text-2xl h-1/4 pt-3 text-[#494A8A] font-bold'>Vehiculo</h2>
-            <div className=' h-3/4 pl-10 pr-10 flex flex-col justify-center items-center pb-5'>
-              <input type="text" placeholder="Placa" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="text" placeholder="Marca" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
-              <input type="text" placeholder="Modelo" className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1' />
             
+            {/* Datos del Vehículo */}
+            <div className='w-1/2'>
+              <h2 className='text-2xl h-1/4 p-3 text-[#494A8A] font-bold'>Vehículo</h2>
+              <div className='h-3/4 pl-10 pr-10 flex flex-col justify-center items-center pb-5'>
+                {Object.keys(vehicleValues).map((field, index) => (
+                  <div key={index} className='relative w-full'>
+                    <input
+                      type="text"
+                      placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                      list={field}
+                      value={vehicleValues[field]}
+                      onChange={(e) => handleVehicleChange(field, e.target.value)}  
+                      onBlur={() => handleVehicleBlur(field)}
+                      className='w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1'
+                    />
+                    <datalist id={field} >
+                      {vehicleOptions[field].map((option, id) => (
+                        <option key={id} value={option} />
+                      ))}
+                    </datalist>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
         <section className='flex justify-center items-center w-full h-7/11 space-x-2 '> {/*Busqueda de producto o servicio y factura*/}
           <div className='w-1/2 h-full border-2 border-[#494A8A] rounded-sm'> {/*Busqueda de producto o servicio*/}

@@ -30,7 +30,7 @@ const LookDetail = ({ selectedOption }) => {
           default:
             return;
         }
-          const response = await fetch(`http://api.factupos.me:8000/api/${endpoint}/`, {
+          const response = await fetch(`http://localhost:8000/api/${endpoint}/`, {
             headers: {
               'Authorization': `Bearer ${token}`,  // Corregido 'Authorization'
             }
@@ -75,7 +75,7 @@ const LookDetail = ({ selectedOption }) => {
             return;
         }
 
-        const response = await fetch(`http://api.factupos.me:8000/api/${endpoint}/${id}/`, {
+        const response = await fetch(`http://localhost:8000/api/${endpoint}/${id}/`, {
           method: 'DELETE',
           headers: {  // Corregido 'Authorization'
             'Authorization': `Bearer ${token}`,

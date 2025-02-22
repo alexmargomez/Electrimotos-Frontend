@@ -10,7 +10,7 @@ function LoginForm() {
   const login = async (name, password) => {
     const loginData = { name, password }; // Enviamos 'name' tal cual lo espera la API
     try {
-      const response = await fetch('http://api.factupos.me:8000/api/login', {
+      const response = await fetch('http://localhost:8000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData),
@@ -89,7 +89,7 @@ const Logout = (navigate) => async() =>{
     }
 
     try {
-      const response = await fetch('http://api.factupos.me:8000/api/logout', {
+      const response = await fetch('http://localhost:8000/api/logout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
