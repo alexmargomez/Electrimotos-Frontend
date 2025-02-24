@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DateTimeDisplay from '../components/DateTimeDisplay';
 
 const Schedule = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('authToken');
   const [services, setServices] = useState([]);
   const [serviceInput, setServiceInput] = useState('');
@@ -33,13 +34,12 @@ const Schedule = () => {
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/customers', {
+        const response = await fetch(`${API_URL}/customers`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           }
         });
         const result = await response.json();
-        // Almacena los productos en el estado
         const clientOpts = {
           name: result.map(client => client.name),
           id: result.map(client => client.id),
@@ -56,7 +56,7 @@ const Schedule = () => {
   
     const fetchVehicle = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/vehicles', {
+        const response = await fetch(`${API_URL}/vehicles`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           }
@@ -68,6 +68,7 @@ const Schedule = () => {
           model: result.map(vehicle => vehicle.model),
         };
         setVehicleOptions(vehicleOpts);
+        setVehicleData(result);
         console.log('Vehículos:', result);
       } catch (error) {
         console.error('Error fetching vehicles:', error);
@@ -80,13 +81,16 @@ const Schedule = () => {
 
   const handleVehicleChange = (field, value) => {
     setVehicleValues(prev => ({ ...prev, [field]: value }));
-    const vehicle = vehicleData.find(vehicle => vehicle[field].toString() === value.toString());
-    if (vehicle) {
-      setVehicleValues({
-        plate: vehicle.plate,
-        make: vehicle.make,
-        model: vehicle.model,
-      });
+
+    if(field === 'plate' || field === 'make' || field === 'model') {
+      const vehicle = vehicleData.find(vehicle => vehicle[field].toString() === value.toString());
+      if (vehicle) {
+        setVehicleValues({
+          plate: vehicle.plate,
+          make: vehicle.make,
+          model: vehicle.model,
+        });
+      }
     }
   };
 
@@ -105,6 +109,8 @@ const Schedule = () => {
     }
   };
 
+ 
+  
   const addService = () => {
     if (serviceInput.trim() !== '') {
       setServices([...services, serviceInput]);
@@ -118,9 +124,10 @@ const Schedule = () => {
 
   const handleSchedule = async () => {
     let customerId = clientValues.id;
-
-    if (!customerId ) {
-      const cliente = await fetch('http://localhost:8000/api/customers/', {
+    const existingClient = clientData.find(client => client.id.toString() === customerId);
+    
+    if (!existingClient) {
+      const cliente = await fetch(`${API_URL}/customers/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,51 +141,59 @@ const Schedule = () => {
         }),
       });
       if (!cliente.ok) {
-        throw new Error('Error creando el cliente');  
+        const errorData = await cliente.text();
+        console.error('Error creating customer:', errorData);
+        throw new Error('Error creando el cliente');
+      } else {
+        const clienteData = await cliente.json();
+        customerId = clienteData.id; // Asigna el nuevo customerId
       }
-    }
-    
-
-    const vehicle = await fetch('http://localhost:8000/api/vehicles/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json', 
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        "plate": vehicleValues.plate,
-        "make": vehicleValues.make,
-        "model": vehicleValues.model,
-        "customer_id": customerId,
-      }),
-    });
-
-    if (!vehicle.ok) {
-      throw new Error('Error creando el vehículo');
     }
 
     try {
-        const scheduleResponse = await fetch('http://localhost:8000/api/schedules/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                "customer_id": customerId,
-                "servicios": services,
-            }),
-        });
+      const vehicleResponse = await fetch(`${API_URL}/vehicles/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          "plate": vehicleValues.plate,
+          "make": vehicleValues.make,
+          "model": vehicleValues.model,
+          "customer_id": customerId,
+        }),
+      });
 
-        if (!scheduleResponse.ok) {
-            throw new Error('Error creando el agendamiento');
-        }
+      if (!vehicleResponse.ok) {
+        const errorData = await vehicleResponse.json();
+        console.error('Error response data:', errorData);
+        throw new Error('Error creando el vehículo');
+      }
 
-        alert('Agendamiento creado exitosamente'); 
-        window.location.reload();
+      const scheduleResponse = await fetch(`${API_URL}/schedules/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          "customer_id": customerId,
+          "servicios": services,
+        }),
+      });
+
+      if (!scheduleResponse.ok) {
+        const errorData = await scheduleResponse.json();
+        console.error('Error response data:', errorData);
+        throw new Error('Error creando el agendamiento');
+      }
+
+      alert('Agendamiento creado exitosamente'); 
+      window.location.reload();
     } catch (error) {
-        console.error('Error creando el agendamiento:', error);
-        alert(error.message);
+      console.error('Error creando el vehículo:', error);
+      alert(error.message);
     }
   };
 
@@ -229,7 +244,7 @@ const Schedule = () => {
                       list={field}
                       value={vehicleValues[field]}
                       onChange={(e) => handleVehicleChange(field, e.target.value)}
-                      onBlur={(e) => handleVehicleChange(field, e.target.value)}
+                      onInput={(e) => handleVehicleChange(field, e.target.value)}
                       className="w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1"
                     />
                     <datalist id={field}>

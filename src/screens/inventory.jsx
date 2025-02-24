@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import DateTimeDisplay from '../components/DateTimeDisplay';
 
 const Inventory = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [view, setView] = useState('main'); // Estado para cambiar la vista
   const [products, setProducts] = useState([]); // Estado para los productos
   const token = localStorage.getItem('authToken');
+  
 
   const renderContent = () => {
     const [name, setName] = useState('');  
@@ -15,7 +17,7 @@ const Inventory = () => {
     const addProduct = async (name, price, category_id) => {
       try {
         const productData = { name, price,  category_id };
-        const response = await fetch('http://api.factupos.me:8000/api/products', {
+        const response = await fetch(`${API_URL}/products`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -26,7 +28,8 @@ const Inventory = () => {
         if (response.ok) {
           const newProduct = await response.json();
           setProducts([...products, newProduct]);
-          setView('main'); // Cambia la vista después de añadir el producto
+          alert('Producto añadido correctamente');
+          window.location.reload(); // Cambia la vista después de añadir el producto
         } else {
           console.error('Error al hacer la solicitud', response.statusText);
         }
@@ -37,7 +40,7 @@ const Inventory = () => {
     const datesProducts = (event) => {
       event.preventDefault();
       if (name && price && category_id) {
-        addProduct(name, price,  category_id);  
+        addProduct(name, price, category_id);  
       }else{
         console.log('Por favor, llena todos los campos');
       }

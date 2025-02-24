@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import LookProduct from '../components/LookProduct';  
 
 const Sale = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('authToken');
   const [services, setServices] = React.useState([]); // Estado para los servicios  
   const [serviceInput, setServiceInput] = React.useState(''); // Estado para el input de servicio
@@ -35,7 +36,7 @@ const Sale = () => {
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
-        const response = await fetch('http://api.factupos.me:8000/api/customers', {
+        const response = await fetch(`${API_URL}/customers`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           }
@@ -57,7 +58,7 @@ const Sale = () => {
     
     const fetchVehicle = async () => {
       try {
-        const response = await fetch('http://api.factupos.me:8000/api/vehicles', {
+        const response = await fetch(`${API_URL}/vehicles`, {
           headers: {
           'Authorization': `Bearer ${token}`,
           }

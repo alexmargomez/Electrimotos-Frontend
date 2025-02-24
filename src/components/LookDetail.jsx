@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const LookDetail = ({ selectedOption }) => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const [data, setData] = useState([]);  // Estado para los clientes
     const [loading, setLoading] = useState(true);   // Estado para manejar la carga de datos
     const token = localStorage.getItem('authToken');
@@ -30,7 +31,7 @@ const LookDetail = ({ selectedOption }) => {
           default:
             return;
         }
-          const response = await fetch(`http://localhost:8000/api/${endpoint}/`, {
+          const response = await fetch(`${API_URL}/${endpoint}/`, {
             headers: {
               'Authorization': `Bearer ${token}`,  // Corregido 'Authorization'
             }
@@ -75,7 +76,7 @@ const LookDetail = ({ selectedOption }) => {
             return;
         }
 
-        const response = await fetch(`http://localhost:8000/api/${endpoint}/${id}/`, {
+        const response = await fetch(`${API_URL}/${endpoint}/${id}/`, {
           method: 'DELETE',
           headers: {  // Corregido 'Authorization'
             'Authorization': `Bearer ${token}`,

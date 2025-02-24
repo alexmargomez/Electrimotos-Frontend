@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function LoginForm() {
+const LoginForm = () =>  {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [name, setName] = useState(''); // Usamos 'name' para coincidir con la API
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -10,7 +11,7 @@ function LoginForm() {
   const login = async (name, password) => {
     const loginData = { name, password }; // Enviamos 'name' tal cual lo espera la API
     try {
-      const response = await fetch('http://localhost:8000/api/login', {
+      const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData),
@@ -44,7 +45,7 @@ function LoginForm() {
 
   return (
     
-    <div className="login-form">
+    <div className="login-form  w-full p-4 ">
       <form onSubmit={handleLogin}>
         <div className="mb-4">
           <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700">Nombre de usuario</label>
@@ -70,7 +71,7 @@ function LoginForm() {
             required
           />
         </div >
-        <button type="submit" className="w-full py-2 bg-blue-500 text-gray-800 rounded-lg hover:bg-blue-600">
+        <button type="submit" className="w-full py-2 blue text-gray-800 rounded-lg ">
           Ingresar
         </button>
       </form>
@@ -80,34 +81,35 @@ function LoginForm() {
 }
 
 const Logout = (navigate) => async() =>{
-    const token = localStorage.getItem('authToken');
+  const API_URL = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem('authToken');
     
     // Verificamos si el token existe antes de intentar hacer la solicitud
-    if (!token) {
-      console.error('No se encontró el token en localStorage');
-      return;
-    }
+  if (!token) {
+    console.error('No se encontró el token en localStorage');
+    return;
+  }
 
-    try {
-      const response = await fetch('http://localhost:8000/api/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Enviar el token en la cabecera
-        },
-      });
+  try {
+    const response = await fetch(`${API_URL}/logout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Enviar el token en la cabecera
+      },
+    });
 
-      // Verificamos si la respuesta fue exitosa
-      if (response.ok) {
-        localStorage.removeItem('authToken'); // Eliminar el token
-        navigate('/'); // Redirigir a la página de inicio de sesión
-      } else {
-        const errorData = await response.json();
-        console.error('Error al cerrar sesión:', errorData);
-      }
-    } catch (error) {
-      console.error('Error en la solicitud:', error);
+    // Verificamos si la respuesta fue exitosa
+    if (response.ok) {
+      localStorage.removeItem('authToken'); // Eliminar el token
+      navigate('/'); // Redirigir a la página de inicio de sesión
+    } else {
+      const errorData = await response.json();
+      console.error('Error al cerrar sesión:', errorData);
     }
+  } catch (error) {
+    console.error('Error en la solicitud:', error);
+  } 
 };
   
 

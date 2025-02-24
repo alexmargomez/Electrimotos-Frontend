@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const LookProduct = ({ addProduct }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [products, setProducts] = useState([]);  // Estado para los productos
   const [categoryNames, setCategoryNames] = useState({}); // Estado para los nombres de las categorías
   const token = localStorage.getItem('authToken');
@@ -8,7 +9,7 @@ const LookProduct = ({ addProduct }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://api.factupos.me:8000/api/products', {
+        const response = await fetch(`${API_URL}/products`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           }
@@ -27,7 +28,7 @@ const LookProduct = ({ addProduct }) => {
   const fetchCategoryName = async (categoryId) => {
     try {
       if (!categoryNames[categoryId]) {
-        const response = await fetch(`http://api.factupos.me:8000/api/categories/${categoryId}`, {
+        const response = await fetch(`${API_URL}/categories/${categoryId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           }
