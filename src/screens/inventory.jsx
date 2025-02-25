@@ -1,64 +1,182 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DateTimeDisplay from '../components/DateTimeDisplay';
 
 const Inventory = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
-  const [view, setView] = useState('main'); // Estado para cambiar la vista
+  const API_URL = import.meta.env.VITE_API_URL; // Estado para cambiar la vista
   const [products, setProducts] = useState([]); // Estado para los productos
   const token = localStorage.getItem('authToken');
-  
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [category_id, setCategory] = useState('');
+  const [stock , setStock] = useState('');
 
-  const renderContent = () => {
-    const [name, setName] = useState('');  
-    const [price, setPrice] = useState('');
-    //const [quantity, setQuantity] = useState('');
-    const [category_id, setCategory] = useState('');
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(`${API_URL}/products`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      const resultproducts = await response.json();
 
-    const addProduct = async (name, price, category_id) => {
-      try {
-        const productData = { name, price,  category_id };
-        const response = await fetch(`${API_URL}/products`, {
+      const inventoryResponse = await fetch(`${API_URL}/inventory/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      if (!inventoryResponse.ok) {
+        throw new Error(`Error fetching inventory: ${inventoryResponse.statusText}`);
+      }
+      const resultInventory = await inventoryResponse.json(); 
+
+      const PWStock = resultproducts.map(product => {
+        const stockInventory = resultInventory.find(item => item.product_id === product.id);
+        return {...product, stock: stockInventory ? stockInventory.stock : 0};
+      });
+      setProducts(PWStock);
+      console.log('Productos:', PWStock);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  }
+
+  const addProduct = async (name, price, category_id, stock) => {
+    try {
+      const productData = { name, price,  category_id };
+      const response = await fetch(`${API_URL}/products`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(productData),
+      });
+      if (response.ok) {
+        const newProduct = await response.json();
+        setProducts([...products, newProduct]);
+
+        const inventoryData = {stock, product_id: newProduct.id};
+        const inventoryResponse = await fetch(`${API_URL}/inventory`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify(productData),
+          body: JSON.stringify(inventoryData),
         });
-        if (response.ok) {
-          const newProduct = await response.json();
-          setProducts([...products, newProduct]);
-          alert('Producto añadido correctamente');
-          window.location.reload(); // Cambia la vista después de añadir el producto
-        } else {
-          console.error('Error al hacer la solicitud', response.statusText);
+        if (!inventoryResponse.ok) {
+          console.error('Error al hacer la solicitud', inventoryResponse.statusText);
         }
-      } catch (error) {
-        console.error('Error al hacer la solicitud', error);
+        alert('Producto añadido correctamente');
+        fetchProducts();
+         // limpiar datos de los inputs
+        setName('');
+        setPrice('');
+        setCategory('');
+        setStock('');
+      } else {
+        console.error('Error al hacer la solicitud', response.statusText);
       }
-    };
-    const datesProducts = (event) => {
-      event.preventDefault();
-      if (name && price && category_id) {
-        addProduct(name, price, category_id);  
-      }else{
-        console.log('Por favor, llena todos los campos');
+    } catch (error) {
+      console.error('Error al hacer la solicitud', error);
+    }
+  };
+
+  const handleAddProducts = (event) => {
+    event.preventDefault();
+    if (name && price && category_id && stock) {
+      addProduct(name, price, category_id, stock);  
+    }else{
+      console.log('Por favor, llena todos los campos');
+    }
+
+  }
+
+  useEffect(() => {  
+    fetchProducts();
+  }, [token]);
+  
+  const Add = async (productId) => {
+    try {
+      const response = await fetch(`${API_URL}/inventory/${productId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching inventory: ${response.statusText}`);
       }
+      const data = await response.json();
+      const currentStock = data.stock;
 
-    };
+      const updateResponse = await fetch(`${API_URL}/inventory/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({stock: currentStock + 1}),
+      });
+      if (updateResponse.ok) {
+        fetchProducts();
+      }
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+    } 
+  }
 
-    switch (view) {
-      case 'create':
-        return (
-          <div className="p-4 ]">
-            <h2 className="text-xl font-bold mb-4">Crear Producto</h2>
-            <form onSubmit={datesProducts} className="space-y-4">
+  const Remove = async (productId) => {
+    try {
+      const response = await fetch(`${API_URL}/inventory/${productId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching inventory: ${response.statusText}`);
+      }
+      const data = await response.json();
+      const currentStock = data.stock;
+
+      const updateResponse = await fetch(`${API_URL}/inventory/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({stock: currentStock - 1}),
+      });
+      if (updateResponse.ok) {
+        fetchProducts();
+      }
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+    }
+  }
+  return (
+    <div className='h-screen w-full flex flex-col bg-gray-200'>
+      <div className='m-4 mb-0 flex justify-between'>
+        <h1 className='text-left font-bold text-gray-600'>INVENTARIO</h1>
+        <DateTimeDisplay className="flex justify-between" />
+      </div>
+      <div className="m-4 h-full bg-white rounded-sm shadow-xl border-t-3 border-[#FFD700] flex">
+        <div className='flex flex-col w-full h-full'>
+          <section className="p-4 h-20% shadow-xl">
+            <h2 className="text-xl font-bold pb-4">Crear Producto</h2>
+            <form onSubmit={handleAddProducts} className="space-x-4 flex">
               <input 
                 type="text" 
                 value={name} 
                 placeholder="Nombre del producto" 
                 className="w-full p-2 border rounded" 
                 onChange={(e) => setName(e.target.value)} 
+              />            
+              <input 
+                type="number" 
+                value={category_id} 
+                placeholder="Categoria" 
+                className="w-full p-2 border rounded"
+                onChange={(e) => setCategory(e.target.value)} 
               />
               <input 
                 type="number" 
@@ -67,80 +185,61 @@ const Inventory = () => {
                 className="w-full p-2 border rounded"
                 onChange={(e) => setPrice(e.target.value)}
               />
-              {/*
               <input 
                 type="number" 
-                value={quantity} 
+                value={stock} 
                 placeholder="Cantidad" 
                 className="w-full p-2 border rounded" 
-                onChange={(e) => setQuantity(e.target.value)}
-              />
-              */}
-              <input 
-                type="number" 
-                value={category_id} 
-                placeholder="Categoria" 
-                className="w-full p-2 border rounded"
-                onChange={(e) => setCategory(e.target.value)} 
+                onChange={(e) => setStock(e.target.value)}
               />
               <button type="submit" className="rojo text-white px-4 py-2 rounded">Guardar</button>
             </form>
-            <button onClick={() => setView('main')} className="mt-4 text-blue-600">Volver</button>
-          </div>
-        );
-      case 'review':
-        return (
-          <div className="p-4">
+          </section>
+            
+          <section className="p-4 h-full  overflow-auto">
             <h2 className="text-xl font-bold mb-4">Revisar Inventarios</h2>
-            <ul>
+            <div className="grid grid-cols-12 gap-4 font-bold p-2 border-b-2">
+              <div className="col-span-1">Código</div>
+              <div className="col-span-3">Nombre del producto</div>
+              <div className="col-span-2">Categoría</div>
+              <div className="col-span-2">Precio</div>
+              <div className='col-span-1'>Stock</div>
+              <div className="col-span-3 text-center">Modificar Stock</div>
+            </div>
+            <div>
               {products.length === 0 ? (
                 <p>No hay productos registrados.</p>
               ) : (
-                products.map((product, index) => (
-                  <li key={index} className="p-2 border-b">{product}</li>
+                products.map((product) => (
+                  <div key={product.id} className="grid grid-cols-12 gap-4 p-2 border-t-1">
+                    <div className="col-span-1">{product.id}</div>
+                    <div className="col-span-3">{product.name}</div>
+                    <div className="col-span-2">{product.category_id}</div>
+                    <div className="col-span-2">$ {product.price}</div>
+                    <div className="col-span-1">
+                      {product.stock || 0}
+                    </div>
+                    <div className="col-span-3 flex space-x-8 justify-center">
+                      <button 
+                        className="rojo text-white px-4 py-2 rounded"
+                        onClick={() => Add(product.id)}
+                      >
+                        Agregar
+                      </button>
+                      <button 
+                        className="rojo text-white px-4 py-2 rounded"
+                        onClick={() => Remove(product.id)}
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                  </div>
                 ))
               )}
-            </ul>
-            <button onClick={() => setView('main')} className="mt-4 text-blue-600">Volver</button>
-          </div>
-        );
-      default:
-        return (
-          <>
-            <div className='w-full h-full flex flex-wrap justify-center items-center bg-white rounded-l-sm'>
-              <div 
-                className='p-4 bg-[#494A8A] rounded-sm text-white cursor-pointer hover:bg-[#FFD700] hover:text-[#494A8A]'
-                onClick={() => setView('create')}
-              >
-                Crear producto
-              </div>
             </div>
-            <div className='w-full h-full flex flex-wrap justify-center items-center bg-[#494A8A] rounded-r-sm'>
-              <div 
-                className='text-[#494A8A] p-4 bg-white rounded-sm cursor-pointer hover:bg-[#FFD700]'
-                onClick={() => setView('review')}
-              >
-                Revisar inventarios
-              </div>
-            </div>
-          </>
-        );
-    }
-  };
-
-  return (
-    <div className='h-screen w-full flex flex-col bg-gray-200'>
-      <div className='m-4 mb-0 flex justify-between'>
-        <h1 className='text-left font-bold text-gray-600'>INVENTARIO</h1>
-        <DateTimeDisplay className="flex justify-between" />
-      </div>
-      <div className="m-4 h-full bg-white rounded-sm shadow-xl border-t-3 border-[#FFD700] flex">
-        <div className='flex justify-center items-center w-full h-full'>
-          {renderContent()}
+          </section>
         </div>
-        
-      </div>
-      
+      </div> 
     </div>
   );
 };
