@@ -107,8 +107,7 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
                 try {
                     const serviciosArray = JSON.parse(schedule.servicios);
                     if (Array.isArray(serviciosArray)) {
-                      setServices(serviciosArray);
-                      console.log('Servicios:', serviciosArray);
+                      setServices(serviciosArray); // Establece los servicios del Schedule pendiente
                     } else {
                       console.error('Servicios no es un array:', schedule.servicios);
                     }

@@ -63,100 +63,50 @@ const Schedule = () => {
     }
 
     try {
-
-      const vehicleCheckResponse = await fetch(`${API_URL}/vehicles?plate=${vehicleValues.plate}&customer_id=${customerId}`, {
+      const vehicleResponse = await fetch(`${API_URL}/vehicles/`, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          "plate": vehicleValues.plate,
+          "make": vehicleValues.make,
+          "model": vehicleValues.model,
+          "customer_id": customerId,
+        }),
       });
 
-      const existingVehicles = await vehicleCheckResponse.json();
-
-      if (existingVehicles.length > 0) {
-        vehicleId = existingVehicles[0].id;
-      }else{
-        const vehicleResponse = await fetch(`${API_URL}/vehicles/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            "plate": vehicleValues.plate,
-            "make": vehicleValues.make,
-            "model": vehicleValues.model,
-            "customer_id": customerId,
-          }),
-        });
-  
-        if (!vehicleResponse.ok) {
-          const errorData = await vehicleResponse.json();
-          console.error('Error response data:', errorData);
-          throw new Error('Error creando el vehículo');
-        } else {
-          const vehicleData = await vehicleResponse.json();
-          vehicleId = vehicleData.id; // Asigna el nuevo vehicleId
-        }
-      }
-        // A
-      // Verifica si ya existe un agendamiento pendiente para este cliente y vehículo
-      const scheduleCheckResponse = await fetch(`${API_URL}/schedules?customer_id=${customerId}&vehicle_id=${vehicleId}&state=Pendiente`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      });
-
-      const existingSchedules = await scheduleCheckResponse.json();
-
-      if (existingSchedules.length > 0) {
-        // Actualiza el agendamiento existente
-        const scheduleId = existingSchedules[0].id;
-        const updateResponse = await fetch(`${API_URL}/schedules/${scheduleId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            "vehicle_id": vehicleId,
-            "customer_id": customerId,
-            "servicios": services, // Convierte los servicios a JSON
-            "state": "Pendiente",
-          }),
-        });
-
-        if (!updateResponse.ok) {
-          const errorData = await updateResponse.json();
-          console.error('Error response data:', errorData);
-          throw new Error('Error actualizando el agendamiento');
-        }
-
-        alert('Agendamiento actualizado exitosamente');
+      if (!vehicleResponse.ok) {
+        const errorData = await vehicleResponse.json();
+        console.error('Error response data:', errorData);
+        throw new Error('Error creando el vehículo');
       } else {
-        // Crea un nuevo agendamiento
-        const scheduleResponse = await fetch(`${API_URL}/schedules/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            "vehicle_id": vehicleId,
-            "customer_id": customerId,
-            "servicios": services, // Convierte los servicios a JSON
-            "state": "Pendiente",
-          }),
-        });
-
-        if (!scheduleResponse.ok) {
-          const errorData = await scheduleResponse.json();
-          console.error('Error response data:', errorData);
-          throw new Error('Error creando el agendamiento');
-        }
-
-        alert('Agendamiento creado exitosamente');
+        const vehicleData = await vehicleResponse.json();
+        vehicleId = vehicleData.id; // Asigna el nuevo vehicleId
       }
 
+      const scheduleResponse = await fetch(`${API_URL}/schedules/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          "vehicle_id": vehicleId,
+          "customer_id": customerId,
+          "servicios": services,
+          "state": "Pendiente",
+        }),
+      });
+
+      if (!scheduleResponse.ok) {
+        const errorData = await scheduleResponse.json();
+        console.error('Error response data:', errorData);
+        throw new Error('Error creando el agendamiento');
+      }
+
+      alert('Agendamiento creado exitosamente'); 
       window.location.reload();
     } catch (error) {
       console.error('Error creando el agendamiento:', error);
