@@ -51,6 +51,10 @@ const LookProduct = ({ addProduct }) => {
     return <div>No hay Productos disponibles.</div>;
   }
 
+  const formatPrice = (price) => {
+    return price.toLocaleString('es-CO');
+  }
+
   return (
     <div className='flex flex-col w-full '>
       <div className="grid grid-cols-12 gap-4 font-bold p-1 border-b-1">
@@ -65,7 +69,7 @@ const LookProduct = ({ addProduct }) => {
           <div className="col-span-2 ">{product.id}</div>
             <div className="col-span-2">{product.name}</div>
             <div className="col-span-2">{product.category_id}</div>
-            <div className="col-span-2">$ {product.price}</div>
+            <div className="col-span-2">$ {formatPrice(product.price)}</div>
             <div className="col-span-1">{product.stock || 0}</div>         
           <div className="col-span-3 flex space-x-8 justify-center">
             <button 

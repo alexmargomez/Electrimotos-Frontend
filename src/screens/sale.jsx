@@ -13,6 +13,7 @@ const Sale = () => {
   const [serviceInput, setServiceInput] = React.useState(''); // Estado para el input de servicio
   const [serviceValue, setServiceValue] = React.useState(''); // Estado para el valor del servicio
   const [activeTab, setActiveTab] = React.useState('producto');
+  const [total, setTotal] = React.useState(0);
   const [clientValues, setClientValues] = useState({
       name: '',
       id: '',
@@ -33,15 +34,28 @@ const Sale = () => {
 
   const addService = () => {
     if (serviceInput.trim() !== '' && serviceValue.trim() !== '') {
-      const newService = { description: serviceInput, value: serviceValue };
-      setServicesDate([...servicesDate, newService]);
+      const newService = { date: serviceInput, price: parseInt(serviceValue) };
+      setServices([...services, newService]);
       setServiceInput('');
       setServiceValue('');
     }
   }
 
   const removeService = (index) => {
-    setServicesDate(servicesDate.filter((service, i) => i !== index));
+    setServices(services.filter((service, i) => i !== index));
+  }
+  
+  const handlePriceChange = (index, price) => {
+    const updatedServices = services.map((service, i) => 
+      i === index ? { ...service, price: parseInt(price) || 0 } : service
+    );
+    setServices(updatedServices);
+  }
+
+  const handleKeyDown = (event, index) => {
+    if (event.key === 'Enter') {
+      handlePriceChange(index, event.target.value);
+    }
   }
 
   const addProduct = (product) => {
@@ -52,7 +66,27 @@ const Sale = () => {
     setProductsDate(productsDate.filter((product, i) => i !== index));
   }
 
-  console.log(clientValues, vehicleValues, services);
+  useEffect(() => {
+    if (servicesDate.length > 0) {
+      const newServices = servicesDate.map((data) => ({
+        date: data,
+        price: 0,
+      }));
+      setServices((prevServices) => [...prevServices, ...newServices]);
+    }
+  }, [servicesDate]);
+
+  console.log(services , productsDate);
+
+  useEffect(() => {
+    const totalServices = services.reduce((acc, service) => acc + service.price, 0);
+    const totalProducts = productsDate.reduce((acc, product) => acc + product.price, 0);
+    setTotal(totalServices + totalProducts);
+  },[services, productsDate ])
+
+  const formatPrice = (price) => {
+    return price.toLocaleString('es-CO');
+  }
   return (
     <div className='h-screen w-full flex flex-col bg-gray-200'>
       <div className='m-4 mb-0 flex justify-between '>
@@ -136,16 +170,50 @@ const Sale = () => {
             <div className='flex justify-center items-center h-1/10  space-x-10 bg-[#494A8A] '>
               <h2 className='text-white text-2xl'>Facturación</h2>
             </div>
-            <div className='flex flex-col items-center justify-baseline p-4 space-y-2  h-9/10 w-full'>
+            <div className='flex flex-col items-center justify-baseline p-4 space-y-2  h-9/10 w-full overflow-y-auto max-h-[400px]'>
               {productsDate.map((product, index) => (
                 <div key={index} className='p-1 pr-3 pl-3 flex justify-between items-center w-full border-1 rounded-sm '>
-                  <h3 className='text-2xl'>{`${product.name} - ${product.price}`}</h3>
-                  <button className='rojo text-white rounded-md p-1' onClick={() => removeProduct(index)}>Eliminar</button>
+                  <div className='text-xl  w-full h-full mr-2 flex justify-evenly items-center'>
+                    <div className='flex flex-col items-center'>
+                      <h3 className='text-sm'>Nombre:</h3>
+                      <p className='font-bold '>{product.name}</p>
+                    </div>
+                    <div className='flex flex-col  items-center'>
+                      <h3 className='text-sm'>Unidades:</h3>
+                      <p className='font-bold'>1</p>
+                    </div>
+                    <div className='flex flex-col items-center'>
+                      <h3 className='text-sm'>Precio:</h3>
+                      <p className='font-bold'>$ {formatPrice(product.price)}</p>
+                    </div>
+                    
+                  </div>
+                  <button className='rojo text-white rounded-md' onClick={() => removeProduct(index)}>Eliminar</button>
                 </div>
               ))}
-              {servicesDate.map((service, index) => (
+              {services.map((service, index) => (
                 <div key={index} className='p-1 pr-3 pl-3 flex justify-between items-center w-full border-1 rounded-sm '>
-                  <h3 className='text-2xl'>{`${service} - ${service.value}`}</h3>
+                  <div className='text-xl  w-full h-full mr-2 flex justify-evenly items-center'>
+                    <div className='flex flex-col items-center'>
+                      <h3 className='text-sm'>Descripción: </h3>
+                      <p className='font-bold'> {service.date}</p>
+                    </div>
+                    <div className='flex flex-col items-center'>
+                      <h3 className='text-sm'>Precio:</h3>
+                      {service.price === 0 ? (
+                      <input 
+                      type="number"
+                      className='w-20 border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1'
+                      defaultValue={service.price}
+                      onKeyDown={(e) => handleKeyDown(e, index)}
+                      min="0"
+                      />
+                      ) : (
+                        <p className='font-bold'>$ {formatPrice(service.price)}</p>
+                      )
+                      }
+                    </div>
+                  </div>
                   <button className='rojo text-white rounded-md p-1' onClick={() => removeService(index)}>Eliminar</button>
                 </div>
               ))}
@@ -158,7 +226,7 @@ const Sale = () => {
           
           <div className='h-full w-1/2 flex justify-end items-center pr-6'>
             <h3 className='text-[#494A8A] text-5xl font-extrabold pr-3'>Total: </h3>
-            <h3 className='text-[#494A8A] text-5xl font-extrabold'>$ 0</h3>
+            <h3 className='text-[#494A8A] text-5xl font-extrabold'>$ {formatPrice(total)}</h3>
           </div>
           
           <div className=' bg-[#494A8A] h-full w-1/2 flex justify-center items-center rounded-md text-white text-2xl'>

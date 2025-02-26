@@ -142,6 +142,11 @@ const Inventory = () => {
       console.error('Error fetching inventory:', error);
     }
   }
+
+  const formatPrice = (price) => {
+    return price.toLocaleString('es-CO');
+  }
+
   return (
     <div className='h-screen w-full flex flex-col bg-gray-200'>
       <div className='m-4 mb-0 flex justify-between'>
@@ -200,11 +205,11 @@ const Inventory = () => {
                 <p>No hay productos registrados.</p>
               ) : (
                 products.map((product) => (
-                  <div key={product.id} className="grid grid-cols-12 gap-4 p-2 border-t-1">
+                  <div key={product.id} className="grid grid-cols-12 gap-4 p-2 border-t-1 justify-center items-center">
                     <div className="col-span-1">{product.id}</div>
                     <div className="col-span-3">{product.name}</div>
                     <div className="col-span-2">{product.category_id}</div>
-                    <div className="col-span-2">$ {product.price}</div>
+                    <div className="col-span-2">$ {formatPrice(product.price)}</div>
                     <div className="col-span-1">{product.stock || 0}</div>
                     <div className="col-span-3 flex space-x-8 justify-center">
                       <button 
