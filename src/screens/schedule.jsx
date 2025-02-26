@@ -136,7 +136,7 @@ const Schedule = () => {
         alert('Agendamiento creado exitosamente'); 
       }
 
-      
+      window.location.reload();
     } catch (error) {
       console.error('Error creando el agendamiento:', error);
       alert(error.message);
