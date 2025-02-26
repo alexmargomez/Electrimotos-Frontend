@@ -81,24 +81,30 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
         };
         setVehicleOptions(vehicleOpts);
 
+        console.log('clientValues:', clientValues.id);
 
-        const response = await fetch(`${API_URL}/schedules?customer_id=${clientValues.id}&state=Pendiente`, {
-            headers: {
+        
+        const response = await fetch(`${API_URL}/schedules/${clientValues.id}`, {
+          headers: {
                 'Authorization': `Bearer ${token}`,
             },
         });
         const result = await response.json();
+        console.log('Schedules:', result);
+        
         if (result.length > 0) {
             const schedule = result[0];
             if (schedule.state === "Pendiente") {
                 const vehicle = vehicleData.find(vehicle => vehicle.id === schedule.vehicle_id);
                 if (vehicle) {
                     updateVehicleValues({
+                    id: vehicle.id,
                     plate: vehicle.plate,
                     make: vehicle.make,
                     model: vehicle.model
                     });
                     setVehicleValues({
+                    id: vehicle.id,
                     plate: vehicle.plate,
                     make: vehicle.make,
                     model: vehicle.model
@@ -136,11 +142,13 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
       const vehicle = vehicleData.find(vehicle => vehicle[field].toString() === value.toString());
       if (vehicle) {
         updateVehicleValues({
+            id: vehicle.id,
             plate: vehicle.plate,
             make: vehicle.make,
             model: vehicle.model,
         });
         setVehicleValues({
+            id: vehicle.id,
             plate: vehicle.plate,
             make: vehicle.make,
             model: vehicle.model,
@@ -203,6 +211,7 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
         <div className="h-3/4 pl-10 pr-10 flex flex-col justify-center items-center pb-5">
         {Object.keys(vehicleValues).map((field, index) => (
             <div key={index} className="relative w-full">
+              {field !== 'id' && (
                 <input
                 type="text"
                 placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
@@ -212,11 +221,12 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
                 onInput={(e) => handleVehicleChange(field, e.target.value)}
                 className="w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1"
                 />
-                <datalist id={field}>
+              )}
+              <datalist id={field}>
                 {Array.isArray(vehicleOptions[field]) && vehicleOptions[field].map((option, id) => (
-                    <option key={id} value={option} />
+                  <option key={id} value={option} />
                 ))}
-                </datalist>
+              </datalist>
             </div>
         ))}
         </div>

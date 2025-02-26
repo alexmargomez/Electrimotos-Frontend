@@ -40,7 +40,6 @@ const Sale = () => {
       setServiceValue('');
     }
   }
-
   const removeService = (index) => {
     setServices(services.filter((service, i) => i !== index));
   }

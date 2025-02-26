@@ -14,6 +14,7 @@ const Schedule = () => {
     email: ''
   });
   const [vehicleValues, setVehicleValues] = useState({
+    id: '',
     plate: '',
     make: '',
     model: ''
@@ -35,7 +36,7 @@ const Schedule = () => {
   const handleSchedule = async (clientValues, vehicleValues) => {
     let customerId = clientValues.id;
     let vehicleId = vehicleValues.id;
-    console.log('vehicleValues:', vehicleId);
+    
     const existingClient = clientData.find(client => client.id.toString() === customerId);
     
     if (!existingClient) {
@@ -56,58 +57,86 @@ const Schedule = () => {
         const errorData = await cliente.text();
         console.error('Error creating customer:', errorData);
         throw new Error('Error creando el cliente');
-      } else {
-        const clienteData = await cliente.json();
-        customerId = clienteData.id; // Asigna el nuevo customerId
       }
+      
     }
-
+    
     try {
-      const vehicleResponse = await fetch(`${API_URL}/vehicles/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          "plate": vehicleValues.plate,
-          "make": vehicleValues.make,
-          "model": vehicleValues.model,
-          "customer_id": customerId,
-        }),
-      });
 
-      if (!vehicleResponse.ok) {
-        const errorData = await vehicleResponse.json();
-        console.error('Error response data:', errorData);
-        throw new Error('Error creando el vehículo');
-      } else {
+      const vehicleExists = vehicleData.find(vehicle => vehicle.id === vehicleValues.id);
+      console.log('vehicleValues:', vehicleId);
+      if (!vehicleExists) {
+        const vehicleResponse = await fetch(`${API_URL}/vehicles/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            "plate": vehicleValues.plate,
+            "make": vehicleValues.make,
+            "model": vehicleValues.model,
+            "customer_id": customerId,
+          }),
+        });
+
+        if (!vehicleResponse.ok) {
+          const errorData = await vehicleResponse.json();
+          console.error('Error response data:', errorData);
+          throw new Error('Error creando el vehículo');
+        } 
         const vehicleData = await vehicleResponse.json();
         vehicleId = vehicleData.id; // Asigna el nuevo vehicleId
       }
 
-      const scheduleResponse = await fetch(`${API_URL}/schedules/`, {
-        method: 'POST',
+      const scheduleExists = await fetch(`${API_URL}/schedules/${customerId}`, {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          "vehicle_id": vehicleId,
-          "customer_id": customerId,
-          "servicios": services,
-          "state": "Pendiente",
-        }),
       });
+      const response = await scheduleExists.json();
+      console.log('response:', response);
 
-      if (!scheduleResponse.ok) {
-        const errorData = await scheduleResponse.json();
-        console.error('Error response data:', errorData);
-        throw new Error('Error creando el agendamiento');
+      if(response.length > 0){
+        
+        const scheduleResponse = await fetch(`${API_URL}/schedules/${customerId}`,{
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            "servicios": services,
+            "state": "Pendiente",
+          }),
+        });
+        
+        alert('Agendamiento actualizado exitosamente'); 
+      }else{
+        const scheduleResponse = await fetch(`${API_URL}/schedules/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            "vehicle_id": vehicleId,
+            "customer_id": customerId,
+            "servicios": services,
+            "state": "Pendiente",
+          }),
+        });
+  
+        if (!scheduleResponse.ok) {
+          const errorData = await scheduleResponse.json();
+          console.error('Error response data:', errorData);
+          throw new Error('Error creando el agendamiento');
+        }
+        alert('Agendamiento creado exitosamente'); 
       }
 
-      alert('Agendamiento creado exitosamente'); 
-      window.location.reload();
+      
     } catch (error) {
       console.error('Error creando el agendamiento:', error);
       alert(error.message);
