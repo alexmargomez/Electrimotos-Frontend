@@ -7,7 +7,9 @@ import DatesRegister from '../components/DatesRegister';
 const Sale = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('authToken');
-  const [services, setServices] = React.useState([]); // Estado para los servicios  
+  const [services, setServices] = React.useState([]);
+  const [servicesDate, setServicesDate] = React.useState([]);
+  const [productsDate, setProductsDate] = React.useState([]);
   const [serviceInput, setServiceInput] = React.useState(''); // Estado para el input de servicio
   const [serviceValue, setServiceValue] = React.useState(''); // Estado para el valor del servicio
   const [activeTab, setActiveTab] = React.useState('producto');
@@ -32,20 +34,25 @@ const Sale = () => {
   const addService = () => {
     if (serviceInput.trim() !== '' && serviceValue.trim() !== '') {
       const newService = { description: serviceInput, value: serviceValue };
-      setServices([...services, newService]);
+      setServicesDate([...servicesDate, newService]);
       setServiceInput('');
       setServiceValue('');
     }
   }
 
   const removeService = (index) => {
-    setServices(services.filter((service, i) => i !== index));
+    setServicesDate(servicesDate.filter((service, i) => i !== index));
   }
 
   const addProduct = (product) => {
-    setServices([...services, product]);
+    setProductsDate([...productsDate, product]);  
   }
 
+  const removeProduct = (index) => {
+    setProductsDate(productsDate.filter((product, i) => i !== index));
+  }
+
+  console.log(clientValues, vehicleValues, services);
   return (
     <div className='h-screen w-full flex flex-col bg-gray-200'>
       <div className='m-4 mb-0 flex justify-between '>
@@ -62,6 +69,8 @@ const Sale = () => {
             setVehicleData={setVehicleData}
             setClientValues={setClientValues}
             setVehicleValues={setVehicleValues}
+            setServices={setServicesDate} 
+            
           />
       </section>
 
@@ -93,7 +102,7 @@ const Sale = () => {
                       className=' focus:outline-none w-full border-b-1 border-gray-500 outline-none placeholder-gray-500'
                     />
                   </div>
-                  <div className='p-2 flex justify-center items-start m-4 mt-2 bg-white overflow-y-auto max-h-[300px] h-6/7  w-full rounded-sm shadow-sm'>
+                  <div className='p-2 flex justify-center items-start mt-2 bg-white overflow-y-auto max-h-[300px] h-6/7  w-full rounded-sm shadow-sm'>
                     <LookProduct addProduct={addProduct}/>
                   </div>
                 </div>
@@ -128,9 +137,15 @@ const Sale = () => {
               <h2 className='text-white text-2xl'>Facturación</h2>
             </div>
             <div className='flex flex-col items-center justify-baseline p-4 space-y-2  h-9/10 w-full'>
-              {services.map((service, index) => (
+              {productsDate.map((product, index) => (
                 <div key={index} className='p-1 pr-3 pl-3 flex justify-between items-center w-full border-1 rounded-sm '>
-                  <h3 className='text-2xl'>{service.name ? `${service.name} - ${service.price}` : `${service.description} - ${service.value}`}</h3>
+                  <h3 className='text-2xl'>{`${product.name} - ${product.price}`}</h3>
+                  <button className='rojo text-white rounded-md p-1' onClick={() => removeProduct(index)}>Eliminar</button>
+                </div>
+              ))}
+              {servicesDate.map((service, index) => (
+                <div key={index} className='p-1 pr-3 pl-3 flex justify-between items-center w-full border-1 rounded-sm '>
+                  <h3 className='text-2xl'>{`${service} - ${service.value}`}</h3>
                   <button className='rojo text-white rounded-md p-1' onClick={() => removeService(index)}>Eliminar</button>
                 </div>
               ))}

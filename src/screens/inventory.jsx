@@ -19,22 +19,11 @@ const Inventory = () => {
       });
       const resultproducts = await response.json();
 
-      const inventoryResponse = await fetch(`${API_URL}/inventory/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      });
-      if (!inventoryResponse.ok) {
-        throw new Error(`Error fetching inventory: ${inventoryResponse.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Error fetching products: ${response.statusText}`);
       }
-      const resultInventory = await inventoryResponse.json(); 
-
-      const PWStock = resultproducts.map(product => {
-        const stockInventory = resultInventory.find(item => item.product_id === product.id);
-        return {...product, stock: stockInventory ? stockInventory.stock : 0};
-      });
-      setProducts(PWStock);
-      console.log('Productos:', PWStock);
+      setProducts(resultproducts);
+      console.log('Productos:', resultproducts);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
@@ -197,7 +186,7 @@ const Inventory = () => {
           </section>
             
           <section className="p-4 h-full  overflow-auto">
-            <h2 className="text-xl font-bold mb-4">Revisar Inventarios</h2>
+            <h2 className="text-xl font-bold mb-4">Busqueda...</h2>
             <div className="grid grid-cols-12 gap-4 font-bold p-2 border-b-2">
               <div className="col-span-1">Código</div>
               <div className="col-span-3">Nombre del producto</div>
@@ -216,9 +205,7 @@ const Inventory = () => {
                     <div className="col-span-3">{product.name}</div>
                     <div className="col-span-2">{product.category_id}</div>
                     <div className="col-span-2">$ {product.price}</div>
-                    <div className="col-span-1">
-                      {product.stock || 0}
-                    </div>
+                    <div className="col-span-1">{product.stock || 0}</div>
                     <div className="col-span-3 flex space-x-8 justify-center">
                       <button 
                         className="rojo text-white px-4 py-2 rounded"

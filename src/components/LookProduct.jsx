@@ -52,19 +52,26 @@ const LookProduct = ({ addProduct }) => {
   }
 
   return (
-    <div className='flex flex-col gap-2 w-full '>
-      {products.map((item) => (
-        <div key={item.id} className='flex w-full border p-2 justify-between '>
-          <div className='flex space-x-4'>
-            <div>Nombre: {item.name}</div>
-            <div>Precio: {item.price}</div>
-            <div>Categoria: {categoryNames[item.category_id] || 'Cargando...'}</div>
-          </div>
-          <div>
+    <div className='flex flex-col w-full '>
+      <div className="grid grid-cols-12 gap-4 font-bold p-1 border-b-1">
+        <div className="col-span-2">Código</div>
+        <div className="col-span-2">Nombre</div>
+        <div className="col-span-2">Categoría</div>
+        <div className="col-span-2">Precio</div>
+        <div className='col-span-1'>Stock</div>
+      </div>
+      {products.map((product) => (
+        <div key={product.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center"> 
+          <div className="col-span-2 ">{product.id}</div>
+            <div className="col-span-2">{product.name}</div>
+            <div className="col-span-2">{product.category_id}</div>
+            <div className="col-span-2">$ {product.price}</div>
+            <div className="col-span-1">{product.stock || 0}</div>         
+          <div className="col-span-3 flex space-x-8 justify-center">
             <button 
               type='button' 
               className='rojo'
-              onClick={() => addProduct(item)}
+              onClick={() => addProduct(product)}
             >
               Agregar
             </button>
