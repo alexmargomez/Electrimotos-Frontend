@@ -45,7 +45,7 @@ const LoginForm = () =>  {
 
   return (
     
-    <div className="login-form  w-full p-4 ">
+    <div className="login-form  w-full p-12 ">
       <form onSubmit={handleLogin}>
         <div className="mb-4">
           <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700">Nombre de usuario</label>

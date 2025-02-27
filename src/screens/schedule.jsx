@@ -95,24 +95,42 @@ const Schedule = () => {
           'Authorization': `Bearer ${token}`,
         },
       });
-      const response = await scheduleExists.json();
-      console.log('response:', response);
-
+      const response= await scheduleExists.json();
       if(response.length > 0){
+        const responsePendiente = response.find(schedule => schedule.state === "Pendiente" );
         
-        const scheduleResponse = await fetch(`${API_URL}/schedules/${customerId}`,{
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            "servicios": services,
-            "state": "Pendiente",
-          }),
-        });
+        if(responsePendiente){
+          console.log('responsePendiente:', responsePendiente.id);
+          
+          const scheduleResponse = await fetch(`${API_URL}/schedules/${responsePendiente.id}`,{
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              "servicios": services,
+              "state": "Pendiente",
+            }),
+          });
+          alert('Agendamiento actualizado exitosamente'); 
+        }else{
+          const scheduleResponse = await fetch(`${API_URL}/schedules/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              "vehicle_id": vehicleId,
+              "customer_id": customerId,
+              "servicios": services,
+              "state": "Pendiente",
+            }),
+          });
+          alert('Agendamiento creado exitosamente');
+        }
         
-        alert('Agendamiento actualizado exitosamente'); 
       }else{
         const scheduleResponse = await fetch(`${API_URL}/schedules/`, {
           method: 'POST',

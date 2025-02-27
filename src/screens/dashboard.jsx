@@ -15,7 +15,7 @@ const Dashboard = () => {
     { bgColor: "#00CED1 ", number: "4", name: "Clientes", icon: <FaUsersViewfinder /> },
     { bgColor: "#FF6F61 ", number: "3", name: "Vehiculos", icon: <PiMotorcycleFill /> },
     { bgColor: "#00CED1", number: "5", name: "Movimientos", icon:  <MdShoppingCartCheckout /> },
-    { bgColor: "#FF6F61 ", number: "6", name: "Reportes", icon: <TbReportAnalytics />    }
+    { bgColor: "#FF6F61 ", number: "6", name: "Agendados", icon: <TbReportAnalytics />    }
   ];
 
   return (
@@ -34,10 +34,10 @@ const Dashboard = () => {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#FFA500")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = block.bgColor)}
             onClick={() => navigate("/look")} 
-          > {/* cambiar /look por la ruta corespondinte*/}
+          > 
             {/* Primera mitad */}
             <div className='w-full flex flex-col items-center justify-center'>
-              {/*<div className='text-5xl items-center justify-center'>{block.number}</div>*/}
+              
               <div className='text-3xl items-center justify-center text-white'>{block.name}</div>  
             </div>
 

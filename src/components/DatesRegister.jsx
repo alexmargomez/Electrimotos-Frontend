@@ -90,37 +90,36 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
             },
         });
         const result = await response.json();
-        console.log('Schedules:', result);
         
         if (result.length > 0) {
-            const schedule = result[0];
-            if (schedule.state === "Pendiente") {
-                const vehicle = vehicleData.find(vehicle => vehicle.id === schedule.vehicle_id);
-                if (vehicle) {
-                    updateVehicleValues({
-                    id: vehicle.id,
-                    plate: vehicle.plate,
-                    make: vehicle.make,
-                    model: vehicle.model
-                    });
-                    setVehicleValues({
-                    id: vehicle.id,
-                    plate: vehicle.plate,
-                    make: vehicle.make,
-                    model: vehicle.model
-                    });
-                }
-                try {
-                    const serviciosArray = JSON.parse(schedule.servicios);
-                    if (Array.isArray(serviciosArray)) {
-                      setServices(serviciosArray); // Establece los servicios del Schedule pendiente
-                    } else {
-                      console.error('Servicios no es un array:', schedule.servicios);
-                    }
-                } catch (e) {
+          const schedulePendiente = result.find(schedule => schedule.state === "Pendiente");
+          if (schedulePendiente) {
+            const vehicle = vehicleData.find(vehicle => vehicle.id === schedulePendiente.vehicle_id);
+            if (vehicle) {
+              updateVehicleValues({
+                id: vehicle.id,
+                plate: vehicle.plate,
+                make: vehicle.make,
+                model: vehicle.model
+              });
+              setVehicleValues({
+                id: vehicle.id,
+                plate: vehicle.plate,
+                make: vehicle.make,
+                model: vehicle.model
+              });
+            }
+            try {
+              const serviciosArray = JSON.parse(schedulePendiente.servicios);
+              if (Array.isArray(serviciosArray)) {
+                setServices(serviciosArray); // Establece los servicios del Schedule pendiente
+              } else {
+                console.error('Servicios no es un array:', schedule.servicios);
+              }
+            } catch (e) {
                     console.error('Error al parsear servicios como JSON:', e);
-                }
-            }   
+            }
+          }   
         }
       }else {
         const vehicleOpts = {

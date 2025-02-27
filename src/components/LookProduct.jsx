@@ -4,6 +4,7 @@ const LookProduct = ({ addProduct }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [products, setProducts] = useState([]);  // Estado para los productos
   const [categoryNames, setCategoryNames] = useState({}); // Estado para los nombres de las categorías
+  const [units, setUnits] = useState({});
   const token = localStorage.getItem('authToken');
 
   useEffect(() => {
@@ -47,6 +48,16 @@ const LookProduct = ({ addProduct }) => {
     });
   }, [products]);
 
+  const handleUnitChange = (productId, value) => {
+    setUnits(prevState => ({ ...prevState, [productId]: value }));
+    
+    setProducts(prevProducts => 
+      prevProducts.map(product => 
+        product.id === productId ? { ...product, und: value } : product
+      )
+    );
+  };
+
   if (products.length === 0) {
     return <div>No hay Productos disponibles.</div>;
   }
@@ -62,7 +73,7 @@ const LookProduct = ({ addProduct }) => {
         <div className="col-span-2">Nombre</div>
         <div className="col-span-2">Categoría</div>
         <div className="col-span-2">Precio</div>
-        <div className='col-span-1'>Stock</div>
+        <div className='col-span-1'>Und</div>
       </div>
       {products.map((product) => (
         <div key={product.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center"> 
@@ -70,7 +81,15 @@ const LookProduct = ({ addProduct }) => {
             <div className="col-span-2">{product.name}</div>
             <div className="col-span-2">{product.category_id}</div>
             <div className="col-span-2">$ {formatPrice(product.price)}</div>
-            <div className="col-span-1">{product.stock || 0}</div>         
+            <div className="col-span-1">
+              <input 
+                type="number"
+                value={units[product.id] || 0} 
+                onChange={(e) => handleUnitChange(product.id, parseInt(e.target.value))}
+                min="0"
+                className="w-full text-center"
+              />
+            </div>         
           <div className="col-span-3 flex space-x-8 justify-center">
             <button 
               type='button' 

@@ -58,8 +58,13 @@ const Sale = () => {
   }
 
   const addProduct = (product) => {
-    setProductsDate([...productsDate, product]);  
+   
+    const total = product.price * product.und;
+
+    const updatedProduct ={ ...product, total};
+    setProductsDate([...productsDate, updatedProduct]);  
   }
+  console.log(productsDate);
 
   const removeProduct = (index) => {
     setProductsDate(productsDate.filter((product, i) => i !== index));
@@ -79,13 +84,101 @@ const Sale = () => {
 
   useEffect(() => {
     const totalServices = services.reduce((acc, service) => acc + service.price, 0);
-    const totalProducts = productsDate.reduce((acc, product) => acc + product.price, 0);
+    const totalProducts = productsDate.reduce((acc, product) => acc + product.total, 0);
     setTotal(totalServices + totalProducts);
   },[services, productsDate ])
 
   const formatPrice = (price) => {
     return price.toLocaleString('es-CO');
   }
+  //Creacion de Factura Sale Sale_details services
+  const handleInovice = async (clientValues, vehicleValues) => {
+    let customerId = clientValues.id;
+    let vehicleId = vehicleValues.id;
+    
+    const existingClient = clientData.find(client => client.id.toString() === customerId);
+    
+    if (!existingClient) {
+      const cliente = await fetch(`${API_URL}/customers/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          "id": clientValues.id,
+          "name": clientValues.name,
+          "phone": clientValues.phone,
+          "email": clientValues.email,
+        }),
+      });
+      if (!cliente.ok) {
+        const errorData = await cliente.text();
+        console.error('Error creating customer:', errorData);
+        throw new Error('Error creando el cliente');
+      }
+      
+    }
+    
+    try {
+
+      const vehicleExists = vehicleData.find(vehicle => vehicle.id === vehicleValues.id);
+      console.log('vehicleValues:', vehicleId);
+      if (!vehicleExists) {
+        const vehicleResponse = await fetch(`${API_URL}/vehicles/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            "plate": vehicleValues.plate,
+            "make": vehicleValues.make,
+            "model": vehicleValues.model,
+            "customer_id": customerId,
+          }),
+        });
+
+        if (!vehicleResponse.ok) {
+          const errorData = await vehicleResponse.json();
+          console.error('Error response data:', errorData);
+          throw new Error('Error creando el vehículo');
+        } 
+        const vehicleData = await vehicleResponse.json();
+        vehicleId = vehicleData.id; // Asigna el nuevo vehicleId
+      }
+      const scheduleExists = await fetch(`${API_URL}/schedules/${customerId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const response= await scheduleExists.json();
+      if(response.length > 0){
+        const responsePendiente = response.find(schedule => schedule.state === "Pendiente");
+        
+        if(responsePendiente){
+          console.log('responsePendiente:', responsePendiente);
+          const scheduleResponse = await fetch(`${API_URL}/schedules/${responsePendiente.id}`,{
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              "servicios": services,
+              "state": "Completado",
+            }),
+          });
+        }
+      }
+
+    }catch (error) {
+      console.error('Error creating Factura', error);
+      throw new Error('Error creando el FACTURA');
+    }
+  }
+
   return (
     <div className='h-screen w-full flex flex-col bg-gray-200'>
       <div className='m-4 mb-0 flex justify-between '>
@@ -179,11 +272,11 @@ const Sale = () => {
                     </div>
                     <div className='flex flex-col  items-center'>
                       <h3 className='text-sm'>Unidades:</h3>
-                      <p className='font-bold'>1</p>
+                      <p className='font-bold'>{product.und}</p>
                     </div>
                     <div className='flex flex-col items-center'>
                       <h3 className='text-sm'>Precio:</h3>
-                      <p className='font-bold'>$ {formatPrice(product.price)}</p>
+                      <p className='font-bold'>$ {formatPrice(product.total)}</p>
                     </div>
                     
                   </div>
@@ -228,7 +321,10 @@ const Sale = () => {
             <h3 className='text-[#494A8A] text-5xl font-extrabold'>$ {formatPrice(total)}</h3>
           </div>
           
-          <div className=' bg-[#494A8A] h-full w-1/2 flex justify-center items-center rounded-md text-white text-2xl'>
+          <div 
+            className=' bg-[#494A8A] h-full w-1/2 flex justify-center items-center rounded-md text-white text-2xl cursor-pointer'
+            onClick={() => handleInovice(clientValues, vehicleValues)}
+          >
             Facturar
           </div>
         </section>
