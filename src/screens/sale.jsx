@@ -123,7 +123,7 @@ const Sale = () => {
     try {
 
       const vehicleExists = vehicleData.find(vehicle => vehicle.id === vehicleValues.id);
-      console.log('vehicleValues:', vehicleId);
+     
       if (!vehicleExists) {
         const vehicleResponse = await fetch(`${API_URL}/vehicles/`, {
           method: 'POST',
@@ -173,6 +173,76 @@ const Sale = () => {
         }
       }
 
+      const saleCreate = await fetch(`${API_URL}/sales/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          "customer_id": customerId,
+          "total": total,
+          "payment_method": "Efectivo",
+        }),
+      });
+      if (!saleCreate.ok) {
+        const errorData = await saleCreate.json();
+        console.error('Error response data:', errorData);
+        throw new Error('Error creando la venta');
+      }else{
+        const saleData = await saleCreate.json();
+        const saleId = saleData.id;
+        
+        //Creacion de Sale_details por cada producto 
+        //Creancion de Services por cada servicio
+        for (const product of productsDate) {
+          
+          const saleDetail = await fetch(`${API_URL}/sale-details/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              "sale_id": saleId,
+              "product_id": product.id,
+              "quantity": product.und,
+              "price_total": product.total,   
+            }),
+          });
+          if (!saleDetail.ok) {
+            const errorData = await saleDetail.json();
+            console.error('Error response data:', errorData);
+            throw new Error('Error creando el detalle de la venta');
+          }else{
+
+            alert('Productos guardados con éxito');
+          }
+        }
+        for (const service of services) {
+          const serviceCreate = await fetch(`${API_URL}/services/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              "sale_id": saleId,
+              "date": service.date,
+              "price": service.price,
+            }),
+          });
+          if (!serviceCreate.ok) {
+            const errorData = await serviceCreate.json();
+            console.error('Error response data:', errorData);
+            throw new Error('Error creando el servicio');
+          }else{
+            alert('servicios guardados con éxito');
+          }
+        }
+        window.location.reload();
+      }
+      
     }catch (error) {
       console.error('Error creating Factura', error);
       throw new Error('Error creando el FACTURA');

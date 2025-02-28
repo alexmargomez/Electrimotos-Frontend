@@ -228,7 +228,7 @@ const LookDetail = ({ selectedOption }) => {
             <div className="col-span-2">{`$ ${formatPrice(item.total)}`}</div>
             <div className="col-span-2 flex space-x-5 justify-center">
               <button type="button" className="rojo" onClick={() => handleDelete(item.id)}>Eliminar</button>
-              <button type="button">Modificar</button>
+              
             </div>
           </div>
         ))}
