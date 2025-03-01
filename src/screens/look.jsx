@@ -7,7 +7,7 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 const Look = () => {
   
   const [isOpen, setIsOpen] = useState(false); // Estado para controlar la visibilidad del menú
-  const options = ["Productos", "Clientes", "Vehiculos", "Ventas", "Movimientos"]; // Opciones del menú
+  const options = ["Productos", "Clientes", "Vehiculos", "Ventas", "Pendientes"]; // Opciones del menú
   const [selectedOption, setSelectedOption] = useState(options[0]); // Estado para la opción seleccionada
 
   // Opciones del menú
@@ -61,7 +61,7 @@ const Look = () => {
           />
         </div>
         
-        <button className=' w-2/10 focus:outline-none custom-button border-2 border-gray-300'>Buscar</button>
+        <button className=' w-2/10 blue'>Buscar</button>
         
       </div>
       <div className=' h-screen  m-4 mt-2 rounded-sm bg-white shadow-2xl p-4 overflow-y-auto'>

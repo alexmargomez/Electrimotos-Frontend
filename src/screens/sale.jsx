@@ -64,7 +64,7 @@ const Sale = () => {
     const updatedProduct ={ ...product, total};
     setProductsDate([...productsDate, updatedProduct]);  
   }
-  console.log(productsDate);
+
 
   const removeProduct = (index) => {
     setProductsDate(productsDate.filter((product, i) => i !== index));
@@ -80,7 +80,7 @@ const Sale = () => {
     }
   }, [servicesDate]);
 
-  console.log(services , productsDate);
+  
 
   useEffect(() => {
     const totalServices = services.reduce((acc, service) => acc + service.price, 0);
@@ -95,7 +95,7 @@ const Sale = () => {
   const handleInovice = async (clientValues, vehicleValues) => {
     let customerId = clientValues.id;
     let vehicleId = vehicleValues.id;
-    
+    console.log('vehicleId:', vehicleId);
     const existingClient = clientData.find(client => client.id.toString() === customerId);
     
     if (!existingClient) {
@@ -181,6 +181,7 @@ const Sale = () => {
         },
         body: JSON.stringify({
           "customer_id": customerId,
+          "vehicle_id": vehicleId,
           "total": total,
           "payment_method": "Efectivo",
         }),
@@ -193,6 +194,16 @@ const Sale = () => {
         const saleData = await saleCreate.json();
         const saleId = saleData.id;
         
+        const invoiceSale = await fetch(`${API_URL}/invoices/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, 
+          },
+          body: JSON.stringify({
+            "sale_id": saleId,
+          }),
+        });
         //Creacion de Sale_details por cada producto 
         //Creancion de Services por cada servicio
         for (const product of productsDate) {
@@ -214,9 +225,6 @@ const Sale = () => {
             const errorData = await saleDetail.json();
             console.error('Error response data:', errorData);
             throw new Error('Error creando el detalle de la venta');
-          }else{
-
-            alert('Productos guardados con éxito');
           }
         }
         for (const service of services) {
@@ -236,10 +244,9 @@ const Sale = () => {
             const errorData = await serviceCreate.json();
             console.error('Error response data:', errorData);
             throw new Error('Error creando el servicio');
-          }else{
-            alert('servicios guardados con éxito');
           }
         }
+        alert('Factura creada exitosamente');
         window.location.reload();
       }
       
@@ -318,12 +325,12 @@ const Sale = () => {
                   value={serviceValue}
                   onChange={(e) => setServiceValue(e.target.value)}
                   />       
-                  <div 
-                  className=' bg-[#494A8A] h-1/6 w-full flex justify-center items-center rounded-md text-white text-2xl cursor-pointer'
+                  <button
+                  className=' button-Date h-1/6 w-full flex justify-center items-center rounded-md text-white text-2xl cursor-pointer'
                   onClick={addService}
                   >
                     Agregar
-                  </div>
+                  </button>
                 </div>
               )}
             </div>
@@ -391,12 +398,12 @@ const Sale = () => {
             <h3 className='text-[#494A8A] text-5xl font-extrabold'>$ {formatPrice(total)}</h3>
           </div>
           
-          <div 
-            className=' bg-[#494A8A] h-full w-1/2 flex justify-center items-center rounded-md text-white text-2xl cursor-pointer'
+          <button
+            className=' button-Date h-full w-1/2 flex justify-center items-center rounded-md text-white text-2xl cursor-pointer'
             onClick={() => handleInovice(clientValues, vehicleValues)}
           >
             Facturar
-          </div>
+          </button>
         </section>
         
       </div>

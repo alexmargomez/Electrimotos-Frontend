@@ -1,4 +1,12 @@
 
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: white;
+    color: black;
+    
+  }
+}
+
 :root {
   font-family: 'Roboto', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -27,6 +35,18 @@ a:hover {
   background-color: #494A8A !important;
   color: white;
 }
+.blue:hover {
+  background-color: #FFD700 !important;
+}
+
+.button-Date {
+  background-color: #494A8A !important;
+  color: white;
+  font-size: 1.5rem;
+}
+.button-Date:hover {
+  background-color: #FFA500 !important;
+}
 
 body {
   margin: 0;
@@ -42,6 +62,10 @@ body {
 
 .rojo {
   background-color: rgb(236, 68, 68) !important;
+  color: white;
+}
+.rojo:hover {
+  background-color: #FFD700 !important;
 }
 
 button {

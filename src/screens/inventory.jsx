@@ -29,9 +29,9 @@ const Inventory = () => {
     }
   }
 
-  const addProduct = async (name, price, category_id, stock) => {
+  const addProduct = async (name, price,  stock) => {
     try {
-      const productData = { name, price,  category_id };
+      const productData = { name, price };
       const response = await fetch(`${API_URL}/products`, {
         method: 'POST',
         headers: { 
@@ -61,7 +61,6 @@ const Inventory = () => {
          // limpiar datos de los inputs
         setName('');
         setPrice('');
-        setCategory('');
         setStock('');
       } else {
         console.error('Error al hacer la solicitud', response.statusText);
@@ -73,8 +72,8 @@ const Inventory = () => {
 
   const handleAddProducts = (event) => {
     event.preventDefault();
-    if (name && price && category_id && stock) {
-      addProduct(name, price, category_id, stock);  
+    if (name && price  && stock) {
+      addProduct(name, price, stock);  
     }else{
       console.log('Por favor, llena todos los campos');
     }
@@ -167,13 +166,6 @@ const Inventory = () => {
               />            
               <input 
                 type="number" 
-                value={category_id} 
-                placeholder="Categoria" 
-                className="w-full p-2 border rounded"
-                onChange={(e) => setCategory(e.target.value)} 
-              />
-              <input 
-                type="number" 
                 value={price} 
                 placeholder="Precio" 
                 className="w-full p-2 border rounded"
@@ -186,16 +178,15 @@ const Inventory = () => {
                 className="w-full p-2 border rounded" 
                 onChange={(e) => setStock(e.target.value)}
               />
-              <button type="submit" className="rojo text-white px-4 py-2 rounded">Guardar</button>
+              <button type="submit" className="blue text-white px-4 py-2 rounded">Guardar</button>
             </form>
           </section>
             
           <section className="p-4 h-full  overflow-auto">
             <h2 className="text-xl font-bold mb-4">Busqueda...</h2>
-            <div className="grid grid-cols-12 gap-4 font-bold p-2 border-b-2">
+            <div className="grid grid-cols-10 gap-4 font-bold p-2 border-b-2">
               <div className="col-span-1">Código</div>
               <div className="col-span-3">Nombre del producto</div>
-              <div className="col-span-2">Categoría</div>
               <div className="col-span-2">Precio</div>
               <div className='col-span-1'>Stock</div>
               <div className="col-span-3 text-center">Modificar Stock</div>
@@ -205,10 +196,9 @@ const Inventory = () => {
                 <p>No hay productos registrados.</p>
               ) : (
                 products.map((product) => (
-                  <div key={product.id} className="grid grid-cols-12 gap-4 p-2 border-t-1 justify-center items-center">
+                  <div key={product.id} className="grid grid-cols-10 gap-4 p-2 border-t-1 justify-center items-center">
                     <div className="col-span-1">{product.id}</div>
                     <div className="col-span-3">{product.name}</div>
-                    <div className="col-span-2">{product.category_id}</div>
                     <div className="col-span-2">$ {formatPrice(product.price)}</div>
                     <div className="col-span-1">{product.stock || 0}</div>
                     <div className="col-span-3 flex space-x-8 justify-center">

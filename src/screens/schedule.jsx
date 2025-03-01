@@ -194,12 +194,12 @@ const Schedule = () => {
                   value={serviceInput}
                   onChange={(e) => setServiceInput(e.target.value)}
                 />
-                <div
-                  className="cursor-pointer bg-[#494A8A] h-1/6 w-full flex justify-center items-center rounded-md text-white text-2xl"
+                <button
+                  className="button-Date cursor-pointer  h-1/6 w-full flex justify-center items-center rounded-md text-white text-2xl"
                   onClick={addService}
                 >
                   Agregar
-                </div>
+                </button>
               </div>
             </div>
 
@@ -228,12 +228,12 @@ const Schedule = () => {
           </section>
           {/* Botón de Agendar */}
           <section className="w-full pt-2">
-            <div 
-              className="bg-[#494A8A] h-12 w-full flex justify-center items-center rounded-md text-white text-2xl cursor-pointer"
+            <button  
+              className="button-Date h-12 w-full flex justify-center items-center rounded-md  cursor-pointer"
               onClick={() => handleSchedule(clientValues, vehicleValues)}
             >
               Agendar
-            </div>
+            </button>
           </section>
         </div>
       </div>

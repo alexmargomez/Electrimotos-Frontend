@@ -75,13 +75,14 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
       if (clientValues.id) {
         const filterVehicles = vehicleData.filter(vehicle => vehicle.customer_id.toString() === clientValues.id);
         const vehicleOpts = {
+          id: filterVehicles.map(vehicle => vehicle.id),
           plate: filterVehicles.map(vehicle => vehicle.plate),
           make: filterVehicles.map(vehicle => vehicle.make),
           model: filterVehicles.map(vehicle => vehicle.model),
         };
         setVehicleOptions(vehicleOpts);
 
-        console.log('clientValues:', clientValues.id);
+        console.log('clientoptions:', vehicleOpts);
 
         
         const response = await fetch(`${API_URL}/schedules/${clientValues.id}`, {
@@ -121,13 +122,6 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
             }
           }   
         }
-      }else {
-        const vehicleOpts = {
-          plate: vehicleData.map(vehicle => vehicle.plate),
-          make: vehicleData.map(vehicle => vehicle.make),
-          model: vehicleData.map(vehicle => vehicle.model),
-        };
-        setVehicleOptions(vehicleOpts);
       }
     };
     flVehicles();
@@ -137,7 +131,7 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
     updateVehicleValues(prev => ({ ...prev, [field]: value }));
     setVehicleValues(prev => ({ ...prev, [field]: value }));
 
-    if (field === 'plate' || field === 'make' || field === 'model') {
+    if (field === 'plate' ) {
       const vehicle = vehicleData.find(vehicle => vehicle[field].toString() === value.toString());
       if (vehicle) {
         updateVehicleValues({
