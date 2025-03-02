@@ -19,7 +19,6 @@ const FactuPrint = ({id}) => {
                 });
                 const result = await response.json();
                 setFactura(result[0]);
-                console.log("Resultados",result);
             }
             catch (error) {
                 console.error('Error fetching factura:', error);

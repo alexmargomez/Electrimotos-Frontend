@@ -91,6 +91,7 @@ const LookDetail = ({ selectedOption }) => {
         } else {
           setData(result);
         }
+
         if(selectedOption === 'Ventas'){
           const customerNames = {};
           const invoiceNumbers = {};
@@ -363,7 +364,8 @@ const LookDetail = ({ selectedOption }) => {
   if (selectedOption === 'Clientes') {
     return (
       <div className="flex flex-col w-full">
-        <div className="grid grid-cols-12 gap-4 font-bold p-1 border-b-1">
+        <div className="grid grid-cols-13 gap-4 font-bold p-1 border-b-1">
+          <div className='col-span-1'>Vista</div>
           <div className="col-span-2">Identificación</div>
           <div className="col-span-3">Nombre</div>
           <div className="col-span-2">Teléfono</div>
@@ -371,15 +373,16 @@ const LookDetail = ({ selectedOption }) => {
           <div className="col-span-3">Acciones</div>
         </div>
         {data.map((item) => (
-          <div key={item.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center">
+          <div key={item.id} className="grid grid-cols-13 gap-4 p-1 border-t-1 justify-center items-center">
             
-            <div className="col-span-2 flex justify-center items-center space-x-5">
+            <div className="col-span-1 flex justify-center items-center space-x-5 ">
               <div className='flex justify-center items-center '>                                
                 <ReportCustomer id={item.id} name={item.name} phone={item.phone} email={item.email}/>
               </div>
-              <div>
+                            
+            </div>
+            <div className='col-span-2'>
                 {item.id}
-              </div>              
             </div>
             <div className="col-span-3">{item.name}</div>            
             <div className="col-span-2">{item.phone}</div>
@@ -432,22 +435,20 @@ const LookDetail = ({ selectedOption }) => {
   if (selectedOption === 'Vehiculos') {
     return (
       <div className="flex flex-col w-full">
-        <div className="grid grid-cols-12 gap-4 font-bold p-1 border-b-1">
-        <div className="col-span-2">ID</div>
+        <div className="grid grid-cols-11 gap-4 font-bold p-1 border-b-1">
+        <div className="col-span-1">Vista</div>
         <div className="col-span-2">Placa</div>
           <div className="col-span-3">Marca</div>          
           <div className="col-span-2">Modelo</div>
           <div className="col-span-3">Acciones</div>
         </div>
         {data.map((item) => (
-          <div key={item.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center">
-            <div className="col-span-2 flex justify-center items-center space-x-5">
+          <div key={item.id} className="grid grid-cols-11 gap-4 p-1 border-t-1 justify-center items-center">
+            <div className="col-span-1 flex justify-center items-center space-x-5">
               <div className='flex justify-center items-center '>                                
-                <ReportVehicle id={item.id} plate={item.plate} make={item.make} model={item.model} customer_id={item.customer_id}/>
+                <ReportVehicle id={item.id} plate={item.plate} make={item.make} model={item.model} idCustomer={item.customer_id}/>
               </div>
-              <div>
-                {item.id}
-              </div>
+              
             </div>
             <div className="col-span-2">{item.plate}</div>
             <div className="col-span-3">{item.make}</div>            
@@ -528,38 +529,35 @@ const LookDetail = ({ selectedOption }) => {
   if (selectedOption === 'Pendientes') {
     return (
       <div className="flex flex-col w-full">
-        <div className="grid grid-cols-12 gap-4 font-bold p-1 border-b-1">
-          <div className="col-span-2">Fecha</div>
-          <div className="col-span-3">Servicios</div>
+        <div className="grid grid-cols-10 gap-4 font-bold p-1 border-b-1">
+          <div className="col-span-1">Fecha</div>
           <div className="col-span-3">Cliente</div>
-          <div className="col-span-1">vehiculo</div>
-          <div className="col-span-3">Acciones</div>
+          <div className="col-span-1">vehiculo</div> 
+          <div className="col-span-3">Servicios</div>                  
+          <div className="col-span-2">Acciones</div>
         </div>
         {data.map((item) => (
-          <div key={item.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center">
-            <div className="col-span-2 flex justify-center items-center space-x-5">
-              <div className='flex justify-center items-center '>                                
-                <FaEye />
-              </div>
+          <div key={item.id} className="grid grid-cols-10 gap-4 p-1 border-t-1 justify-center items-center">
+            <div className="col-span-1 flex justify-center items-center space-x-5">
+              
               <div>
                 {formatDateTime(item.created_at)}
               </div>
             </div>
-            
-            <div className="col-span-3">
-            {Array.isArray(item.servicios) ? 
-              item.servicios.map((servicio, index) => (
-                <div key={index} className="flex flex-col space-y-1 border-b-1 border-gray-300">
-                  {servicio}
-                </div>
-              ))
-            :
-              `N/A`
-            }
-            </div>
-            <div className="col-span-3">{item.customer_id}</div>
+            <div className="col-span-3">{item.customer_id}</div> 
             <div className="col-span-1">{item.vehicle_id}</div>
-            <div className="col-span-3 flex space-x-5 justify-center">
+            <div className="col-span-3">
+              {Array.isArray(item.servicios) ? 
+                item.servicios.map((servicio, index) => (
+                  <div key={index} className="flex flex-col space-y-1 border-b-1 border-gray-300">
+                    {servicio}
+                  </div>
+                ))
+              :
+                `N/A`
+              }
+            </div>                       
+            <div className="col-span-2 flex space-x-5 justify-center">
               <button type="button" className="rojo" onClick={() => handleDelete(item.id)}>Eliminar</button>
 
             </div>

@@ -65,7 +65,6 @@ const ReporCustomer = ({id, name, phone, email}) => {
                             
                         </div>
                     ))
-
                     }
                 </div>
             </div>

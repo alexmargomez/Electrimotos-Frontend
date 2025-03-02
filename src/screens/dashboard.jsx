@@ -21,7 +21,7 @@ const Dashboard = () => {
   ];
 
   const handleOptionClick = (name) => {
-    navigate(`/look/${name.toLowerCase()}`, { state: { selectedOption: name } });
+    navigate(`/look`);
   };
 
   return (

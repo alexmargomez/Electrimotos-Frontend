@@ -3,12 +3,13 @@ import Modal from './Modal';
 import { FaEye, FaRegEye } from "react-icons/fa";
 import { useState, useEffect } from 'react';
 
-const ReportVehicle = ({id, plate, make, model, customer_id}) => {
+const ReportVehicle = ({id, plate, make, model, idCustomer}) => {
     const token = localStorage.getItem('authToken');
     const API_URL = import.meta.env.VITE_API_URL;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [dateServices, setDateServices] = useState([]);
-    const [nameCustomer, setNameCustomer] = useState('')
+    const [nameCustomer, setNameCustomer] = useState('');
+
     useEffect(() => {
         const dateService= async () => {
             const responseService = await fetch(`${API_URL}/services/vehicle/${id}`, {
@@ -22,19 +23,17 @@ const ReportVehicle = ({id, plate, make, model, customer_id}) => {
         }        
         dateService();
         const fetchCustomer = async () => {
-            const response = await fetch(`${API_URL}/customers/${customer_id}`, {
+            const response = await fetch(`${API_URL}/customers/${idCustomer}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
             });
             const result = await response.json();
-            console.log("Resultados",result.name);
             setNameCustomer(result.name);
         }
         fetchCustomer();
         
     },[token, API_URL, id]);
-    
     const openModal = () => {
         setIsModalOpen(true);
     }
@@ -47,6 +46,7 @@ const ReportVehicle = ({id, plate, make, model, customer_id}) => {
             <FaEye />
         </div>
         <Modal show={isModalOpen} onClose={closeModal}>
+        {dateServices.length > 0 ? (
             <div className='flex flex-col justify-between items-center h-full w-full '>
                 <div className='grid grid-cols-10 font-bold text-2xl h-1/8 justify-center items-center  bg-[#494A8A] rounded-t-xl w-full text-white'>
                     
@@ -81,6 +81,13 @@ const ReportVehicle = ({id, plate, make, model, customer_id}) => {
                     }
                 </div>
             </div>
+        ) : (
+            <div className='flex justify-center items-center h-full w-full'>
+                <h1>No hay servicios registrados</h1>
+            </div>
+        
+        )}
+            
         </Modal>
     </div>
   )
