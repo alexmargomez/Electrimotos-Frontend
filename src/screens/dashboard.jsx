@@ -9,14 +9,20 @@ import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
+
   const blocks = [
     { bgColor: "#00CED1 ", number: "1", name: "Ventas", icon: <FaFileInvoiceDollar /> },
-    { bgColor: "#FF6F61 ", number: "2", name: "Inventario", icon: <MdOutlineInventory /> },
+    { bgColor: "#FF6F61 ", number: "2", name: "Productos", icon: <MdOutlineInventory /> },
     { bgColor: "#00CED1 ", number: "4", name: "Clientes", icon: <FaUsersViewfinder /> },
     { bgColor: "#FF6F61 ", number: "3", name: "Vehiculos", icon: <PiMotorcycleFill /> },
     { bgColor: "#00CED1", number: "5", name: "Movimientos", icon:  <MdShoppingCartCheckout /> },
-    { bgColor: "#FF6F61 ", number: "6", name: "Agendados", icon: <TbReportAnalytics />    }
+    { bgColor: "#FF6F61 ", number: "6", name: "Pendientes", icon: <TbReportAnalytics />    }
   ];
+
+  const handleOptionClick = (name) => {
+    navigate(`/look/${name.toLowerCase()}`, { state: { selectedOption: name } });
+  };
 
   return (
     <div className='h-screen w-full flex flex-col bg-gray-200'>
@@ -33,7 +39,7 @@ const Dashboard = () => {
             className={"flex flex-row items-center justify-center"}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#FFA500")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = block.bgColor)}
-            onClick={() => navigate("/look")} 
+            onClick={() => handleOptionClick(block.name)} 
           > 
             {/* Primera mitad */}
             <div className='w-full flex flex-col items-center justify-center'>

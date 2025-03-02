@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import FactuPrint from './FactuPrint';
 import { FaEye, FaRegEye } from "react-icons/fa";
 import Modalmini from './Modalmini';
+import ReportCustomer from './ReportCustomer';
+import ReportVehicle from './ReportVehicle';
 
 const LookDetail = ({ selectedOption }) => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -13,6 +16,8 @@ const LookDetail = ({ selectedOption }) => {
   const token = localStorage.getItem('authToken');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productUpdate, setProductUpdate] = useState({ id: '', name: '', price: '' });
+  const [customerUpdate, setCustomerUpdate] = useState({ id: '', name: '', phone: '', email: '' });
+  const [vehicleUpdate, setVehicleUpdate] = useState({ id: '', plate: '', make: '', model: '' });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,9 +56,41 @@ const LookDetail = ({ selectedOption }) => {
         }
 
         const result = await response.json();  // Convierte la respuesta en JSON
-        setData(result);  // Guarda los clientes en el estado
-        console.log(`Datos de ${selectedOption}:`, result);
-
+        if (selectedOption === 'Pendientes') {
+          const updatedResult = await Promise.all(
+            result.filter(item => item.state === "Pendiente").map(async (item) => {
+              try {
+                const serviciosArray = JSON.parse(item.servicios);
+                const responseCustomer = await fetch(`${API_URL}/customers/${item.customer_id}`, {
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                  }
+                });
+                const responseVehicle = await fetch(`${API_URL}/vehicles/${item.vehicle_id}`, {
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                  }
+                });
+                const resultVehicle = await responseVehicle.json();
+                const customerPlate = resultVehicle.plate;
+                const resultCustomer = await responseCustomer.json();
+                const CustomerName = resultCustomer.name;
+                if (Array.isArray(serviciosArray)) {
+                  return { ...item, servicios: serviciosArray, customer_id: CustomerName, vehicle_id: customerPlate };
+                } else {
+                  console.error('Servicios no es un array:', item.servicios);
+                  return item;
+                }
+              } catch (e) {
+                console.error('Error al parsear servicios:', item.servicios, e);
+                return item;
+              }
+            })
+          );
+          setData(updatedResult);
+        } else {
+          setData(result);
+        }
         if(selectedOption === 'Ventas'){
           const customerNames = {};
           const invoiceNumbers = {};
@@ -83,8 +120,6 @@ const LookDetail = ({ selectedOption }) => {
           setInvoiceNumber(invoiceNumbers);
         
         }
-        console.log("customerName: ", customerName);
-        console.log("invoiceNumber: ", invoiceNumber);
       } catch (error) {
         console.error(`Error al obtener los ${selectedOption.toLowerCase()}:`, error);
         setError(error.message);
@@ -114,7 +149,7 @@ const LookDetail = ({ selectedOption }) => {
           endpoint = 'sales';
           break;
         case 'Pendientes':
-          endpoint = 'inventory-movements';
+          endpoint = 'schedules';
           break;
         default:
           throw new Error(`Opción no válida: ${selectedOption}`);
@@ -169,13 +204,15 @@ const LookDetail = ({ selectedOption }) => {
   
   const openModal = (item) => {
     setProductUpdate(item);
+    setCustomerUpdate(item);
+    setVehicleUpdate(item);
     setIsModalOpen(true);
   };
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-  const handleChange = (e) => {
+  const handleChangeProduct = (e) => {
     const { name, value } = e.target;
     setProductUpdate((prevData) => ({
       ...prevData,
@@ -183,8 +220,23 @@ const LookDetail = ({ selectedOption }) => {
     }));
   };
 
-  const handleSave = async () => {
-    console.log("xd: ", productUpdate)
+  const handleChangeCustomer = (e) => {
+    const { name, value } = e.target;
+    setCustomerUpdate((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+  
+  const handleChangeVehicle = (e) => {
+    const { name, value } = e.target;
+    setVehicleUpdate((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveProduct = async () => {
     const response = await fetch(`${API_URL}/products/${productUpdate.id}`, {
       method: 'PUT',
       headers: {
@@ -205,6 +257,49 @@ const LookDetail = ({ selectedOption }) => {
       console.error('Failed to update product');
     }
   };
+  const handleSaveCustomer = async () => {
+    const response = await fetch(`${API_URL}/customers/${customerUpdate.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      
+      body: JSON.stringify(customerUpdate),
+
+    });
+
+    if (response.ok) {
+      // Handle successful update here, e.g., refresh the data or update the state
+      closeModal();
+      window.location.reload();
+    } else {
+      // Handle error here
+      console.error('Failed to update customer');
+    }
+  };
+  const handleSaveVehicle = async () => {
+    const response = await fetch(`${API_URL}/vehicles/${vehicleUpdate.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      
+      body: JSON.stringify(vehicleUpdate),
+
+    });
+
+    if (response.ok) {
+      // Handle successful update here, e.g., refresh the data or update the state
+      closeModal();
+      window.location.reload();
+    } else {
+      // Handle error here
+      console.error('Failed to update customer');
+    }
+  };
+  
 
   // Renderizado para Productos
   if (selectedOption === 'Productos') {
@@ -240,12 +335,12 @@ const LookDetail = ({ selectedOption }) => {
                     <div className='flex flex-col justify-center items-center h-8/10 space-y-5 w-full' >
                         <div className='flex w-full'>
                             <label className='font-bold text-xl bg-[#494A8A] text-white rounded-l-sm w-1/2'>Nombre:</label>
-                            <input type="text" name="name" placeholder='Nuevo nombre' onChange={handleChange}  className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
+                            <input type="text" name="name" placeholder='Nuevo nombre' onChange={handleChangeProduct}  className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
                         </div>
                         
                         <div className='flex w-full'>
                             <label className='font-bold text-xl bg-[#494A8A] text-white rounded-l-sm w-1/2'>Precio:</label>
-                            <input type="number" name="price" placeholder='Nuevo Precio' onChange={handleChange}  className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
+                            <input type="number" name="price" placeholder='Nuevo Precio' onChange={handleChangeProduct}  className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
                         </div>
                         <div className='flex w-full'>
                             <label className='font-bold text-xl bg-[#494A8A] text-white rounded-l-sm w-1/2'>Stock:</label>
@@ -253,7 +348,7 @@ const LookDetail = ({ selectedOption }) => {
                         </div>
                     </div>
                     <div className='h-1/10 flex justify-center items-center'>
-                        <button type='button' className='blue hover:celest' onClick={handleSave}>Guardar</button>
+                        <button type='button' className='blue hover:celest' onClick={handleSaveProduct}>Guardar</button>
                     </div>
                 </div>
               </Modalmini>
@@ -277,33 +372,55 @@ const LookDetail = ({ selectedOption }) => {
         </div>
         {data.map((item) => (
           <div key={item.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center">
-            <div className="col-span-2">{item.id}</div>
+            
+            <div className="col-span-2 flex justify-center items-center space-x-5">
+              <div className='flex justify-center items-center '>                                
+                <ReportCustomer id={item.id} name={item.name} phone={item.phone} email={item.email}/>
+              </div>
+              <div>
+                {item.id}
+              </div>              
+            </div>
             <div className="col-span-3">{item.name}</div>            
             <div className="col-span-2">{item.phone}</div>
             <div className="col-span-2">{item.email}</div>
             <div className="col-span-3 flex space-x-5 justify-center">
+              
               <button type="button" className="rojo" onClick={() => handleDelete(item.id)}>Eliminar</button>
               <button 
                 type="button"
-                onClick={openModal}
+                onClick={() => openModal(item)}
                 className='blue'
               >
                 Modificar
               </button>
-              <div className='flex justify-center items-center '>
-                <FaEye className='cursor-pointer'/>
-              </div>
-              <Modalmini show={isModalOpen} onClose={closeModal} className=''>
+              <Modalmini show={isModalOpen} onClose={closeModal} >
                 <div className='flex flex-col justify-center items-center h-full w-full '>
-                    <div className='font-bold text-2xl h-1/10 justify-center items-center flex bg-amber-200 w-[70%]'>
-                        <h1 >Producto</h1>
+                    <div className='font-bold text-2xl justify-center items-center flex flex-col h-1/10'>
+                        <h1 >MODIFICAR CLIENTE</h1>
+                        <h2>c.c. {item.id}</h2>
                     </div>
-                    <div className='flex space-x-4 h-1/10 bg-amber-300 justify-center items-center w-[70%]' >
-                        <p>Nombre: {item.name}</p>
-                        <p>Stock: {item.stock}</p>
+                    <div className='flex flex-col justify-center items-center h-8/10 space-y-5 w-full' >
+                        <div className='flex w-full'>
+                            <label className='font-bold text-xl bg-[#494A8A] text-white rounded-l-sm w-1/2'>Nombre:</label>
+                            <input type="text" name="name" placeholder='Nuevo nombre' onChange={handleChangeCustomer}  className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
+                        </div>
+                        
+                        <div className='flex w-full'>
+                            <label className='font-bold text-xl bg-[#494A8A] text-white rounded-l-sm w-1/2'>Telefono:</label>
+                            <input type="text" name="phone" placeholder='Nuevo telefono' onChange={handleChangeCustomer}  className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
+                        </div>
+                        <div className='flex w-full'>
+                            <label className='font-bold text-xl bg-[#494A8A] text-white rounded-l-sm w-1/2'>Email:</label>
+                            <input type="email" name="email" placeholder='Nuevo email' onChange={handleChangeCustomer} className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
+                        </div>
+                    </div>
+                    <div className='h-1/10 flex justify-center items-center'>
+                        <button type='button' className='blue hover:celest' onClick={handleSaveCustomer}>Guardar</button>
                     </div>
                 </div>
               </Modalmini>
+              
             </div>
           </div>
         ))}
@@ -324,7 +441,14 @@ const LookDetail = ({ selectedOption }) => {
         </div>
         {data.map((item) => (
           <div key={item.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center">
-            <div className="col-span-2">{item.id}</div>
+            <div className="col-span-2 flex justify-center items-center space-x-5">
+              <div className='flex justify-center items-center '>                                
+                <ReportVehicle id={item.id} plate={item.plate} make={item.make} model={item.model} customer_id={item.customer_id}/>
+              </div>
+              <div>
+                {item.id}
+              </div>
+            </div>
             <div className="col-span-2">{item.plate}</div>
             <div className="col-span-3">{item.make}</div>            
             <div className="col-span-2">{item.model}</div>
@@ -332,13 +456,36 @@ const LookDetail = ({ selectedOption }) => {
               <button type="button" className="rojo" onClick={() => handleDelete(item.id)}>Eliminar</button>
               <button 
                 type="button"
+                onClick={() => openModal(item)}
                 className='blue'
               >
                 Modificar
               </button>
-              <div className='flex justify-center items-center '>
-                <FaEye className='cursor-pointer'/>
-              </div>
+              <Modalmini show={isModalOpen} onClose={closeModal} >
+                <div className='flex flex-col justify-center items-center h-full w-full '>
+                    <div className='font-bold text-2xl justify-center items-center flex flex-col h-1/10'>
+                        <h1 >MODIFICAR VEHICULO</h1>
+                    </div>
+                    <div className='flex flex-col justify-center items-center h-8/10 space-y-5 w-full' >
+                        <div className='flex w-full'>
+                            <label className='font-bold text-xl bg-[#494A8A] text-white rounded-l-sm w-1/2'>Placa:</label>
+                            <input type="text" name="plate" placeholder='Nueva placa' onChange={handleChangeVehicle}  className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
+                        </div>
+                        
+                        <div className='flex w-full'>
+                            <label className='font-bold text-xl bg-[#494A8A] text-white rounded-l-sm w-1/2'>Modelo:</label>
+                            <input type="text" name="model" placeholder='Nuevo modelo' onChange={handleChangeVehicle}  className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
+                        </div>
+                        <div className='flex w-full'>
+                            <label className='font-bold text-xl bg-[#494A8A] text-white rounded-l-sm w-1/2'>Marca:</label>
+                            <input type="text" name="make" placeholder='Nueva marca' onChange={handleChangeVehicle} className='border-1 shadow-xl rounded-r-sm border-[#494A8A] text-center w-1/2'/>
+                        </div>
+                    </div>
+                    <div className='h-1/10 flex justify-center items-center'>
+                        <button type='button' className='blue hover:celest' onClick={handleSaveVehicle}>Guardar</button>
+                    </div>
+                </div>
+              </Modalmini>
             </div>
           </div>
         ))}
@@ -382,23 +529,39 @@ const LookDetail = ({ selectedOption }) => {
     return (
       <div className="flex flex-col w-full">
         <div className="grid grid-cols-12 gap-4 font-bold p-1 border-b-1">
-          <div className="col-span-2">ID</div>
-          <div className="col-span-3">Cliente</div>
-          <div className="col-span-2">Vehiculo</div>
           <div className="col-span-2">Fecha</div>
+          <div className="col-span-3">Servicios</div>
+          <div className="col-span-3">Cliente</div>
+          <div className="col-span-1">vehiculo</div>
           <div className="col-span-3">Acciones</div>
         </div>
         {data.map((item) => (
           <div key={item.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center">
-            <div className="col-span-2">{item.id}</div>
+            <div className="col-span-2 flex justify-center items-center space-x-5">
+              <div className='flex justify-center items-center '>                                
+                <FaEye />
+              </div>
+              <div>
+                {formatDateTime(item.created_at)}
+              </div>
+            </div>
+            
+            <div className="col-span-3">
+            {Array.isArray(item.servicios) ? 
+              item.servicios.map((servicio, index) => (
+                <div key={index} className="flex flex-col space-y-1 border-b-1 border-gray-300">
+                  {servicio}
+                </div>
+              ))
+            :
+              `N/A`
+            }
+            </div>
             <div className="col-span-3">{item.customer_id}</div>
-            <div className="col-span-2">{item.vehicle_id}</div>
-            <div className="col-span-2">{formatDateTime(item.created_at)}</div>
+            <div className="col-span-1">{item.vehicle_id}</div>
             <div className="col-span-3 flex space-x-5 justify-center">
               <button type="button" className="rojo" onClick={() => handleDelete(item.id)}>Eliminar</button>
-              <div className='flex justify-center items-center '>
-                <FaEye className='cursor-pointer'/>
-              </div>
+
             </div>
           </div>
         ))}

@@ -181,7 +181,6 @@ const Sale = () => {
         },
         body: JSON.stringify({
           "customer_id": customerId,
-          "vehicle_id": vehicleId,
           "total": total,
           "payment_method": "Efectivo",
         }),
@@ -215,6 +214,7 @@ const Sale = () => {
               'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({
+              "customer_id": customerId,
               "sale_id": saleId,
               "product_id": product.id,
               "quantity": product.und,
@@ -235,6 +235,8 @@ const Sale = () => {
               'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({
+              "customer_id": customerId,
+              "vehicle_id": vehicleId,
               "sale_id": saleId,
               "date": service.date,
               "price": service.price,

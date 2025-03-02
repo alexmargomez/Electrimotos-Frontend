@@ -36,6 +36,7 @@ function Main() {
           <Route path="/inventory" element={<PrivateRoute element={<Inventory />} />} />
           <Route path="/schedule" element={<PrivateRoute element={<Schedule />} />} />
           <Route path="/reports" element={<PrivateRoute element={<Report />} />} />
+          <Route path="/look/:option" element={<PrivateRoute element={<Look/>} />} />
         </Routes> 
       </div>
     </div>

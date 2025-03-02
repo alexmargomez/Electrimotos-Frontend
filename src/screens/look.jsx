@@ -1,14 +1,17 @@
 import React from 'react'
 import { useState} from  "react";
+import { useLocation, useParams } from 'react-router-dom';
 import LookDetail from '../components/LookDetail';
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 
 const Look = () => {
-  
+  const { option } = useParams();
+  const location = useLocation();
+  const { selectedOption: stateOption } = location.state || {};
   const [isOpen, setIsOpen] = useState(false); // Estado para controlar la visibilidad del menú
   const options = ["Productos", "Clientes", "Vehiculos", "Ventas", "Pendientes"]; // Opciones del menú
-  const [selectedOption, setSelectedOption] = useState(options[0]); // Estado para la opción seleccionada
+  const [selectedOption, setSelectedOption] = useState(stateOption || options[0]); // Estado para la opción seleccionada
 
   // Opciones del menú
   
