@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import FactuPrint from './FactuPrint';
+import FactuView from './FactuView';
 import Modalmini from './Modalmini';
 import ReportCustomer from './ReportCustomer';
 import ReportVehicle from './ReportVehicle';
@@ -534,7 +534,7 @@ const LookDetail = ({ selectedOption, searchTerm, setNumber }) => {
         {filteredData.map((item) => (
           <div key={item.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center">
             <div className="col-span-3 cursor-pointer " >
-                <FactuPrint id={item.id} customerID={item.customer_id} vehicleID={item.vehicle_id} total={item.total}/>        
+                <FactuView id={item.id} customerID={item.customer_id} vehicleID={item.vehicle_id} total={item.total}/>        
             </div>
             <div className="col-span-3 ">{customerName[item.customer_id]}</div>
             <div className="col-span-2 ">{formatDateTime(item.created_at)}</div>

@@ -8,6 +8,8 @@ import FactuPrint from '../components/FactuPrint';
 const Sale = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('authToken');
+  const [invoices, setInvoices] = useState(null);
+  const [PrintId, setPrintId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [services, setServices] = React.useState([]);
   const [servicesDate, setServicesDate] = React.useState([]);
@@ -212,8 +214,16 @@ const Sale = () => {
             "sale_id": saleId,
           }),
         });
-        //Creacion de Sale_details por cada producto 
-        //Creancion de Services por cada servicio
+        if (!invoiceSale.ok) {
+          const errorData = await invoiceSale.json();
+          console.error('Error response data:', errorData);
+          throw new Error('Error creando la factura');
+        }else{
+          const invoiceData = await invoiceSale.json();
+          setInvoices(invoiceData.id);
+        }
+
+        console.log('Invoice:', invoices);
         for (const product of productsDate) {
           
           const saleDetail = await fetch(`${API_URL}/sale-details/`, {
@@ -257,14 +267,17 @@ const Sale = () => {
             throw new Error('Error creando el servicio');
           }
         }
-        alert('Factura creada exitosamente');
-        window.location.reload();
       }
       
     }catch (error) {
       console.error('Error creating Factura', error);
       throw new Error('Error creando el FACTURA');
     }
+  }
+
+  const handlePrint = (num) => {
+    setPrintId(num);
+    
   }
 
   return (
@@ -416,11 +429,15 @@ const Sale = () => {
           
           <button
             className=' button-Date h-full w-1/2 flex justify-center items-center rounded-md text-white text-2xl cursor-pointer'
-            onClick={() => handleInovice(clientValues, vehicleValues)}
+            onClick={() => {
+              handleInovice(clientValues, vehicleValues);
+              handlePrint(1);
+            }}
           >
             Facturar
           </button>
-
+          {PrintId && ( <FactuPrint id={invoices} />)}
+            
         </section>
         <FactuPrint
           idSale={idSale}
