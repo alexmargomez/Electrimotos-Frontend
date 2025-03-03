@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-const LookProduct = ({ addProduct }) => {
+const LookProduct = ({ addProduct, searchTerm  }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [products, setProducts] = useState([]);  // Estado para los nombres de las categorías
   const [units, setUnits] = useState({});
   const token = localStorage.getItem('authToken');
+  const filterProducts = products.filter(product => product.name?.toLowerCase().includes(searchTerm.toLowerCase()));
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -53,7 +54,7 @@ const LookProduct = ({ addProduct }) => {
         <div className="col-span-2">Precio</div>
         <div className='col-span-1'>Und</div>
       </div>
-      {products.map((product) => (
+      {filterProducts.map((product) => (
         <div key={product.id} className="grid grid-cols-10 gap-4 p-1 border-t-1 justify-center items-center"> 
           <div className="col-span-2 ">{product.id}</div>
             <div className="col-span-2">{product.name}</div>

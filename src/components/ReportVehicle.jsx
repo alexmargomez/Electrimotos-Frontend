@@ -2,6 +2,8 @@ import React from 'react'
 import Modal from './Modal';
 import { FaEye, FaRegEye } from "react-icons/fa";
 import { useState, useEffect } from 'react';
+import { TbHourglassEmpty } from "react-icons/tb";
+
 
 const ReportVehicle = ({id, plate, make, model, idCustomer}) => {
     const token = localStorage.getItem('authToken');
@@ -40,6 +42,12 @@ const ReportVehicle = ({id, plate, make, model, idCustomer}) => {
     const closeModal = () => {
         setIsModalOpen(false);
     }
+
+    const formatDateTime = (dateTime) => {
+        const date = new Date(dateTime);
+        return isNaN(date) ? 'Fecha inválida' : date.toLocaleDateString('es-CO');
+    }
+
   return (
     <div>
         <div onClick={openModal} className=' underline hover:text-blue-30 cursor-pointer'>
@@ -48,7 +56,7 @@ const ReportVehicle = ({id, plate, make, model, idCustomer}) => {
         <Modal show={isModalOpen} onClose={closeModal}>
         {dateServices.length > 0 ? (
             <div className='flex flex-col justify-between items-center h-full w-full '>
-                <div className='grid grid-cols-10 font-bold text-2xl h-1/8 justify-center items-center  bg-[#494A8A] rounded-t-xl w-full text-white'>
+                <div className='shadow-xl grid grid-cols-10 font-bold text-2xl h-1/8 justify-center items-center  bg-[#494A8A] rounded-t-xl w-full text-white'>
                     
                     <div className='col-span-2  justify-center items-center w-full'>
                         <h1 >Placa:</h1>
@@ -67,23 +75,34 @@ const ReportVehicle = ({id, plate, make, model, idCustomer}) => {
                         <p> {nameCustomer}</p>
                     </div>
                 </div>                
-                <div className=' h-7/8 shadow-xl w-full rounded-b-xl overflow-y-scroll' > 
+                <div className='shadow-xl h-7/8  w-full  overflow-y-scroll' > 
+                    <div className='grid grid-cols-4 shadow-lg border-b-2 border-gray-600 p-2'>
+                        <div className='col-span-2 text-xl font-bold'>Servicio</div>
+                        <div className='col-span-1 text-xl font-bold'>Valor Cobrado</div>
+                        <div className='col-span-1 text-xl font-bold'>Fecha</div>
+                    </div>
                     {dateServices.map((service) => (
-                        <div key={service.id} className='space-x-2 flex justify-center items-center p-1 border-b-1 border-gray-300 shadow-sm'>
-                            <div className=''>Servicio: {service.date}</div>
-                            <div className=''>Valor Cobrado: $ {service.price}</div>
-                            <div className=''>Vehiculo: {service.customer_id}</div>
-                            <div className=''>Fecha: {service.created_at}</div>
+                        <div key={service.id} className='grid grid-cols-4 justify-center items-center p-2 border-b-1 border-gray-300 shadow-sm'>
+                            <div className='col-span-2 '>{service.date}</div>
+                            <div className='col-span-1 '>$ {service.price}</div>
+                            <div className='col-span-1 '>{formatDateTime(service.created_at)}</div>
                             
                         </div>
                     ))
 
                     }
                 </div>
+
+                <button className='rojo mt-4' onClick={closeModal}>Salir</button>
             </div>
         ) : (
-            <div className='flex justify-center items-center h-full w-full'>
-                <h1>No hay servicios registrados</h1>
+            <div className='flex flex-col p-20 justify-center items-center h-full w-full space-y-5'>
+                <div className='flex flex-col justify-center items-center '>
+                    <TbHourglassEmpty className='text-6xl'/>
+                    <h1>No hay servicios registrados</h1>
+                </div>
+                
+                <button className='rojo mt-4' onClick={closeModal}>Salir</button>
             </div>
         
         )}

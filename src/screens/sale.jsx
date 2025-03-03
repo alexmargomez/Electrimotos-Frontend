@@ -3,10 +3,12 @@ import DateTimeDisplay from '../components/DateTimeDisplay';
 import { useState, useEffect } from 'react';
 import LookProduct from '../components/LookProduct';  
 import DatesRegister from '../components/DatesRegister';
+import FactuPrint from '../components/FactuPrint';
 
 const Sale = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('authToken');
+  const [searchTerm, setSearchTerm] = useState('');
   const [services, setServices] = React.useState([]);
   const [servicesDate, setServicesDate] = React.useState([]);
   const [productsDate, setProductsDate] = React.useState([]);
@@ -15,19 +17,22 @@ const Sale = () => {
   const [activeTab, setActiveTab] = React.useState('producto');
   const [total, setTotal] = React.useState(0);
   const [clientValues, setClientValues] = useState({
-      name: '',
-      id: '',
-      phone: '',
-      email: ''
-    });
-    const [vehicleValues, setVehicleValues] = useState({
-      plate: '',
-      make: '',
-      model: ''
-    });
-    const [clientData, setClientData] = useState([]); // Estado para almacenar los datos completos de los clientes
-    const [vehicleData, setVehicleData] = useState([]);
-
+    name: '',
+    id: '',
+    phone: '',
+    email: ''
+  });
+  const [vehicleValues, setVehicleValues] = useState({
+    plate: '',
+    make: '',
+    model: ''
+  });
+  const [clientData, setClientData] = useState([]); // Estado para almacenar los datos completos de los clientes
+  const [vehicleData, setVehicleData] = useState([]);
+  const [idSale, setIdSale] = useState(null); // Estado para almacenar el id de la venta
+  const [vehicleID, setVehicleID] = useState(null); // Estado para almacenar el id del vehículo
+  const [customerID, setCustomerID] = useState(null);
+  
   const handleTabClick = (tab) => {
     setActiveTab(tab);  
   };
@@ -181,6 +186,7 @@ const Sale = () => {
         },
         body: JSON.stringify({
           "customer_id": customerId,
+          "vehicle_id": vehicleId,
           "total": total,
           "payment_method": "Efectivo",
         }),
@@ -192,6 +198,9 @@ const Sale = () => {
       }else{
         const saleData = await saleCreate.json();
         const saleId = saleData.id;
+        setIdSale(saleId); // Actualiza el estado con el id de la venta
+        setCustomerID(customerId); // Actualiza el estado con el id del cliente
+        setVehicleID(vehicleId); // Actualiza el estado con el id del vehículo
         
         const invoiceSale = await fetch(`${API_URL}/invoices/`, {
           method: 'POST',
@@ -303,12 +312,14 @@ const Sale = () => {
                   <div className='flex justify-center items-center h-1/7 w-full pr-6 pl-6'>
                     <input 
                       type="text"
-                      placeholder='Buscar...'  
+                      placeholder='Buscar...'
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       className=' focus:outline-none w-full border-b-1 border-gray-500 outline-none placeholder-gray-500'
                     />
                   </div>
                   <div className='p-2 flex justify-center items-start mt-2 bg-white overflow-y-auto max-h-[300px] h-6/7  w-full rounded-sm shadow-sm'>
-                    <LookProduct addProduct={addProduct}/>
+                    <LookProduct addProduct={addProduct} searchTerm={searchTerm}/>
                   </div>
                 </div>
 
@@ -342,6 +353,9 @@ const Sale = () => {
               <h2 className='text-white text-2xl'>Facturación</h2>
             </div>
             <div className='flex flex-col items-center justify-baseline p-4 space-y-2  h-9/10 w-full overflow-y-auto max-h-[400px]'>
+              {productsDate.length === 0 && services.length === 0 && (
+                <p className=' text-gray-500 text-center'>Aún no hay productos ni servicios agregados</p>
+              )}
               {productsDate.map((product, index) => (
                 <div key={index} className='p-1 pr-3 pl-3 flex justify-between items-center w-full border-1 rounded-sm '>
                   <div className='text-xl  w-full h-full mr-2 flex justify-evenly items-center'>
@@ -406,8 +420,14 @@ const Sale = () => {
           >
             Facturar
           </button>
+
         </section>
-        
+        <FactuPrint
+          idSale={idSale}
+          customerID={customerID}
+          vehicleID={vehicleID}
+          total={total}
+        />
       </div>
         
     </div>

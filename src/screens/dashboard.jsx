@@ -1,4 +1,5 @@
-import React from 'react';import { FaFileInvoiceDollar } from "react-icons/fa";
+import React, {useState, useEffect} from 'react';
+import { FaFileInvoiceDollar } from "react-icons/fa";
 import { MdOutlineInventory } from "react-icons/md";
 import { FaUsersViewfinder } from "react-icons/fa6";
 import { MdShoppingCartCheckout } from "react-icons/md";
@@ -9,18 +10,17 @@ import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
-
   const blocks = [
-    { bgColor: "#00CED1 ", number: "1", name: "Ventas", icon: <FaFileInvoiceDollar /> },
-    { bgColor: "#FF6F61 ", number: "2", name: "Productos", icon: <MdOutlineInventory /> },
-    { bgColor: "#00CED1 ", number: "4", name: "Clientes", icon: <FaUsersViewfinder /> },
-    { bgColor: "#FF6F61 ", number: "3", name: "Vehiculos", icon: <PiMotorcycleFill /> },
-    { bgColor: "#00CED1", number: "5", name: "Movimientos", icon:  <MdShoppingCartCheckout /> },
-    { bgColor: "#FF6F61 ", number: "6", name: "Pendientes", icon: <TbReportAnalytics />    }
+    { bgColor: "#00CED1 ", number: "3", name: "Ventas", icon: <FaFileInvoiceDollar /> },
+    { bgColor: "#FF6F61 ", number: "0", name: "Productos", icon: <MdOutlineInventory /> },
+    { bgColor: "#00CED1 ", number: "1", name: "Clientes", icon: <FaUsersViewfinder /> },
+    { bgColor: "#FF6F61 ", number: "2", name: "Vehiculos", icon: <PiMotorcycleFill /> },
+    { bgColor: "#00CED1", number: "4", name: "Pendientes", icon:  <MdShoppingCartCheckout /> },
+    { bgColor: "#FF6F61 ", number: "5", name: "Movimientos", icon: <TbReportAnalytics />    }
   ];
 
-  const handleOptionClick = (name) => {
+  const handleOptionClick = (number) => {
+    localStorage.setItem('number', number);
     navigate(`/look`);
   };
 
@@ -39,11 +39,10 @@ const Dashboard = () => {
             className={"flex flex-row items-center justify-center"}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#FFA500")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = block.bgColor)}
-            onClick={() => handleOptionClick(block.name)} 
+            onClick={() => handleOptionClick(block.number)} 
           > 
             {/* Primera mitad */}
             <div className='w-full flex flex-col items-center justify-center'>
-              
               <div className='text-3xl items-center justify-center text-white'>{block.name}</div>  
             </div>
 

@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import FactuPrint from './FactuPrint';
-import { FaEye, FaRegEye } from "react-icons/fa";
 import Modalmini from './Modalmini';
 import ReportCustomer from './ReportCustomer';
 import ReportVehicle from './ReportVehicle';
 
-const LookDetail = ({ selectedOption }) => {
+const LookDetail = ({ selectedOption, searchTerm, setNumber }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [data, setData] = useState([]);  // Estado para los clientes
   const [customerName, setCustomerName] = useState({});
@@ -18,9 +16,27 @@ const LookDetail = ({ selectedOption }) => {
   const [productUpdate, setProductUpdate] = useState({ id: '', name: '', price: '' });
   const [customerUpdate, setCustomerUpdate] = useState({ id: '', name: '', phone: '', email: '' });
   const [vehicleUpdate, setVehicleUpdate] = useState({ id: '', plate: '', make: '', model: '' });
+  const filteredData = data.filter(item => {
+    switch (selectedOption) {
+      case 'Productos':
+        return item.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      case 'Clientes':
+        return item.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      case 'Vehiculos':
+        return item.plate?.toLowerCase().includes(searchTerm.toLowerCase()) || item.make?.toLowerCase().includes(searchTerm.toLowerCase()) || item.model?.toLowerCase().includes(searchTerm.toLowerCase());
+      case 'Ventas':
+        return customerName[item.customer_id]?.toLowerCase().includes(searchTerm.toLowerCase());
+      case 'Pendientes':
+        return item.customer_id?.toLowerCase().includes(searchTerm.toLowerCase()) || item.vehicle_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      default:
+        return true;
+    }
+  });
 
   useEffect(() => {
+    
     const fetchData = async () => {
+      setLoading(true);
       try {
         let endpoint = '';
 
@@ -28,22 +44,33 @@ const LookDetail = ({ selectedOption }) => {
         switch (selectedOption) {
           case 'Productos':
             endpoint = 'products';
+            setNumber(0);
             break;
           case 'Clientes':
             endpoint = 'customers';
+            setNumber(1);
             break;
           case 'Vehiculos':
             endpoint = 'vehicles';
+            setNumber(2);
             break;
           case 'Ventas':
             endpoint = 'sales';
+            setNumber(3);
             break;
           case 'Pendientes':
             endpoint = 'schedules';
+            setNumber(4);
             break;
+          case 'Movimientos':
+            endpoint = 'inventory-movements';
+            setNumber(5);
+            break;
+
           default:
             throw new Error(`Opción no válida: ${selectedOption}`);
         }
+        
 
         const response = await fetch(`${API_URL}/${endpoint}/`, {
           headers: {
@@ -91,7 +118,7 @@ const LookDetail = ({ selectedOption }) => {
         } else {
           setData(result);
         }
-
+        console.log(result);
         if(selectedOption === 'Ventas'){
           const customerNames = {};
           const invoiceNumbers = {};
@@ -176,33 +203,6 @@ const LookDetail = ({ selectedOption }) => {
     }
   };
   
-
-  const formatPrice = (price) => {
-    if (price == null || isNaN(price)) {
-      return 'N/A';
-    }
-    return price.toLocaleString('es-CO');
-  }
-
-  const formatDateTime = (dateTime) => {
-    const date = new Date(dateTime);
-    return isNaN(date) ? 'Fecha inválida' : date.toLocaleDateString('es-CO');
-  }
-  // Si está cargando, muestra un mensaje
-  if (loading) {
-    return <div>Cargando {selectedOption}...</div>;
-  }
-
-  // Si hay un error, muestra un mensaje de error
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  // Si no hay datos, muestra un mensaje
-  if (data.length === 0) {
-    return <div>No hay {selectedOption.toLowerCase()} disponibles.</div>;
-  }
-  
   const openModal = (item) => {
     setProductUpdate(item);
     setCustomerUpdate(item);
@@ -252,7 +252,7 @@ const LookDetail = ({ selectedOption }) => {
     if (response.ok) {
       // Handle successful update here, e.g., refresh the data or update the state
       closeModal();
-      window.location.reload();
+      await fetchData();
     } else {
       // Handle error here
       console.error('Failed to update product');
@@ -273,7 +273,7 @@ const LookDetail = ({ selectedOption }) => {
     if (response.ok) {
       // Handle successful update here, e.g., refresh the data or update the state
       closeModal();
-      window.location.reload();
+      await fetchData();
     } else {
       // Handle error here
       console.error('Failed to update customer');
@@ -294,13 +294,38 @@ const LookDetail = ({ selectedOption }) => {
     if (response.ok) {
       // Handle successful update here, e.g., refresh the data or update the state
       closeModal();
-      window.location.reload();
+      await fetchData();
     } else {
       // Handle error here
       console.error('Failed to update customer');
     }
   };
   
+  if (loading) {
+    return <div>Cargando {selectedOption}...</div>;
+  }
+
+  // Si hay un error, muestra un mensaje de error
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  // Si no hay datos, muestra un mensaje
+  if (data.length === 0) {
+    return <div>No hay {selectedOption.toLowerCase()} disponibles.</div>;
+  }
+
+  const formatPrice = (price) => {
+    if (price == null || isNaN(price)) {
+      return 'N/A';
+    }
+    return price.toLocaleString('es-CO');
+  }
+
+  const formatDateTime = (dateTime) => {
+    const date = new Date(dateTime);
+    return isNaN(date) ? 'Fecha inválida' : date.toLocaleDateString('es-CO');
+  }
 
   // Renderizado para Productos
   if (selectedOption === 'Productos') {
@@ -313,7 +338,7 @@ const LookDetail = ({ selectedOption }) => {
           <div className="col-span-1">Stock</div>
           <div className="col-span-3">Acciones</div>
         </div>
-        {data.map((item) => (
+        {filteredData.map((item) => (
           <div key={item.id} className="grid grid-cols-10 gap-4 p-1 border-t-1 justify-center items-center">
             <div className="col-span-2">{item.id}</div>
             <div className="col-span-2">{item.name}</div>
@@ -372,7 +397,7 @@ const LookDetail = ({ selectedOption }) => {
           <div className="col-span-2">Email</div>
           <div className="col-span-3">Acciones</div>
         </div>
-        {data.map((item) => (
+        {filteredData.map((item) => (
           <div key={item.id} className="grid grid-cols-13 gap-4 p-1 border-t-1 justify-center items-center">
             
             <div className="col-span-1 flex justify-center items-center space-x-5 ">
@@ -442,7 +467,7 @@ const LookDetail = ({ selectedOption }) => {
           <div className="col-span-2">Modelo</div>
           <div className="col-span-3">Acciones</div>
         </div>
-        {data.map((item) => (
+        {filteredData.map((item) => (
           <div key={item.id} className="grid grid-cols-11 gap-4 p-1 border-t-1 justify-center items-center">
             <div className="col-span-1 flex justify-center items-center space-x-5">
               <div className='flex justify-center items-center '>                                
@@ -506,10 +531,10 @@ const LookDetail = ({ selectedOption }) => {
           <div className="col-span-1">Total</div>
           <div className="col-span-3">Acciones</div>
         </div>
-        {data.map((item) => (
+        {filteredData.map((item) => (
           <div key={item.id} className="grid grid-cols-12 gap-4 p-1 border-t-1 justify-center items-center">
             <div className="col-span-3 cursor-pointer " >
-                <FactuPrint id={item.id} />        
+                <FactuPrint id={item.id} customerID={item.customer_id} vehicleID={item.vehicle_id} total={item.total}/>        
             </div>
             <div className="col-span-3 ">{customerName[item.customer_id]}</div>
             <div className="col-span-2 ">{formatDateTime(item.created_at)}</div>
@@ -536,7 +561,7 @@ const LookDetail = ({ selectedOption }) => {
           <div className="col-span-3">Servicios</div>                  
           <div className="col-span-2">Acciones</div>
         </div>
-        {data.map((item) => (
+        {filteredData.map((item) => (
           <div key={item.id} className="grid grid-cols-10 gap-4 p-1 border-t-1 justify-center items-center">
             <div className="col-span-1 flex justify-center items-center space-x-5">
               
@@ -566,7 +591,11 @@ const LookDetail = ({ selectedOption }) => {
       </div>
     );
   }
-
+  if(selectedOption === 'Movimientos'){
+    <div className="flex flex-col w-full">
+      
+    </div>
+  }
   // Renderizado por defecto
   return <div>No hay datos disponibles.</div>;
 };
