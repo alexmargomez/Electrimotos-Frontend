@@ -203,27 +203,7 @@ const Sale = () => {
         setIdSale(saleId); // Actualiza el estado con el id de la venta
         setCustomerID(customerId); // Actualiza el estado con el id del cliente
         setVehicleID(vehicleId); // Actualiza el estado con el id del vehículo
-        
-        const invoiceSale = await fetch(`${API_URL}/invoices/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, 
-          },
-          body: JSON.stringify({
-            "sale_id": saleId,
-          }),
-        });
-        if (!invoiceSale.ok) {
-          const errorData = await invoiceSale.json();
-          console.error('Error response data:', errorData);
-          throw new Error('Error creando la factura');
-        }else{
-          const invoiceData = await invoiceSale.json();
-          setInvoices(invoiceData.id);
-        }
 
-        console.log('Invoice:', invoices);
         for (const product of productsDate) {
           
           const saleDetail = await fetch(`${API_URL}/sale-details/`, {
@@ -266,6 +246,24 @@ const Sale = () => {
             console.error('Error response data:', errorData);
             throw new Error('Error creando el servicio');
           }
+        }
+        const invoiceSale = await fetch(`${API_URL}/invoices/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, 
+          },
+          body: JSON.stringify({
+            "sale_id": saleId,
+          }),
+        });
+        if (!invoiceSale.ok) {
+          const errorData = await invoiceSale.json();
+          console.error('Error response data:', errorData);
+          throw new Error('Error creando la factura');
+        }else{
+          const invoiceData = await invoiceSale.json();
+          setInvoices(invoiceData.id);
         }
       }
       
