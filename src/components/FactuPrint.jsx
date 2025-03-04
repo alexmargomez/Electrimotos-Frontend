@@ -37,7 +37,6 @@ const FactuPrint = ({ id }) => {
         printWindow.addEventListener('load', () => {
           printWindow.print();
         });
-        window.location.reload();
       } catch (error) {
         console.error('Error fetching invoice:', error);
       }

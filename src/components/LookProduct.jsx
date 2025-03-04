@@ -62,9 +62,9 @@ const LookProduct = ({ addProduct, searchTerm  }) => {
             <div className="col-span-1">
               <input 
                 type="number"
-                value={units[product.id] || 0} 
+                value={units[product.id] || 1} 
                 onChange={(e) => handleUnitChange(product.id, parseInt(e.target.value))}
-                min="0"
+                min="1"
                 className="w-full text-center"
               />
             </div>         
@@ -72,10 +72,11 @@ const LookProduct = ({ addProduct, searchTerm  }) => {
             <button 
               type='button' 
               className='rojo'
-              onClick={() => addProduct(product)}
+              onClick={() => addProduct({ ...product, und: units[product.id] || 1 })}
             >
               Agregar
             </button>
+            
           </div>
         </div>
       ))}

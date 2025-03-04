@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import LookProduct from '../components/LookProduct';  
 import DatesRegister from '../components/DatesRegister';
 import FactuPrint from '../components/FactuPrint';
+import Ready from '../components/Ready';
 
 const Sale = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('authToken');
+  const [showModal, setShowModal] = useState(false);
   const [invoices, setInvoices] = useState(null);
   const [PrintId, setPrintId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -266,7 +268,7 @@ const Sale = () => {
           setInvoices(invoiceData.id);
         }
       }
-      
+    setShowModal(true); 
     }catch (error) {
       console.error('Error creating Factura', error);
       throw new Error('Error creando el FACTURA');
@@ -278,13 +280,17 @@ const Sale = () => {
     
   }
 
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className='h-screen w-full flex flex-col bg-gray-200'>
       <div className='m-4 mb-0 flex justify-between '>
         <h1 className='text-left font-bold text-gray-600'>FACTURAR</h1>
         <DateTimeDisplay className="flex justify-between"  />
       </div>
-      <div className="p-5 m-4 h-full bg-white rounded-sm shadow-xl mt-0 border-t-3 border-[#FFD700] flex flex-wrap">
+      <div className={`p-5 m-4 h-full bg-white rounded-sm shadow-xl mt-0 border-t-3 border-[#FFD700]  flex flex-wrap ${showModal ? 'animate-border' : ''}`}>
 
       <section className='h-3/11 w-full flex shadow-2xl mb-2 rounded-lg'>
         <DatesRegister 
@@ -399,8 +405,8 @@ const Sale = () => {
                       {service.price === 0 ? (
                       <input 
                       type="number"
-                      className='w-20 border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1'
-                      defaultValue={service.price}
+                      className='w-20 border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1 text-center'
+                      placeholder='valor'
                       onKeyDown={(e) => handleKeyDown(e, index)}
                       min="0"
                       />
@@ -434,15 +440,15 @@ const Sale = () => {
           >
             Facturar
           </button>
-          {PrintId && ( <FactuPrint id={invoices} />)}
-            
+          {PrintId && (
+              <>
+                
+                <FactuPrint id={invoices} />
+                <Ready show={showModal} onClose={handleCloseModal} Date="FACTURADO"/>
+              </>
+            )}
+          
         </section>
-        <FactuPrint
-          idSale={idSale}
-          customerID={customerID}
-          vehicleID={vehicleID}
-          total={total}
-        />
       </div>
         
     </div>

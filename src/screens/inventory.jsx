@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import DateTimeDisplay from '../components/DateTimeDisplay';
+import Ready from '../components/Ready';
 
 const Inventory = () => {
-  const API_URL = import.meta.env.VITE_API_URL; // Estado para cambiar la vista
+  const API_URL = import.meta.env.VITE_API_URL;
+  const [showModal, setShowModal] = useState(false); // Estado para cambiar la vista
   const [products, setProducts] = useState([]); // Estado para los productos
   const token = localStorage.getItem('authToken');
   const [name, setName] = useState('');
@@ -56,15 +58,16 @@ const Inventory = () => {
         if (!inventoryResponse.ok) {
           console.error('Error al hacer la solicitud', inventoryResponse.statusText);
         }
-        alert('Producto añadido correctamente');
         fetchProducts();
          // limpiar datos de los inputs
         setName('');
         setPrice('');
         setStock('');
+
       } else {
         console.error('Error al hacer la solicitud', response.statusText);
       }
+      
     } catch (error) {
       console.error('Error al hacer la solicitud', error);
     }
@@ -77,7 +80,7 @@ const Inventory = () => {
     }else{
       console.log('Por favor, llena todos los campos');
     }
-
+    setShowModal(true);
   }
 
   useEffect(() => {  
@@ -146,13 +149,17 @@ const Inventory = () => {
     return price.toLocaleString('es-CO');
   }
 
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className='h-screen w-full flex flex-col bg-gray-200'>
       <div className='m-4 mb-0 flex justify-between'>
         <h1 className='text-left font-bold text-gray-600'>INVENTARIO</h1>
         <DateTimeDisplay className="flex justify-between" />
       </div>
-      <div className="m-4 h-full bg-white rounded-sm shadow-xl border-t-3 border-[#FFD700] flex">
+      <div className={`m-4 h-full bg-white rounded-sm shadow-xl border-t-3 border-[#FFD700] ${showModal ? 'animate-border' : ''} flex`}>
         <div className='flex flex-col w-full h-full'>
           <section className="p-4 h-20% shadow-xl">
             <h2 className="text-xl font-bold pb-4">Crear Producto</h2>
@@ -179,7 +186,9 @@ const Inventory = () => {
                 onChange={(e) => setStock(e.target.value)}
               />
               <button type="submit" className="blue text-white px-4 py-2 rounded">Guardar</button>
+              
             </form>
+            <Ready show={showModal} onClose={handleCloseModal} Date="AGREGADO"/>
           </section>
             
           <section className="p-4 h-full  overflow-auto">

@@ -32,129 +32,129 @@ const LookDetail = ({ selectedOption, searchTerm, setNumber }) => {
         return true;
     }
   });
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      let endpoint = '';
 
-  useEffect(() => {
-    
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        let endpoint = '';
+      // Determinar la API según la opción seleccionada
+      switch (selectedOption) {
+        case 'Productos':
+          endpoint = 'products';
+          setNumber(0);
+          break;
+        case 'Clientes':
+          endpoint = 'customers';
+          setNumber(1);
+          break;
+        case 'Vehiculos':
+          endpoint = 'vehicles';
+          setNumber(2);
+          break;
+        case 'Ventas':
+          endpoint = 'sales';
+          setNumber(3);
+          break;
+        case 'Pendientes':
+          endpoint = 'schedules';
+          setNumber(4);
+          break;
+        case 'Movimientos':
+          endpoint = 'inventory-movements';
+          setNumber(5);
+          break;
 
-        // Determinar la API según la opción seleccionada
-        switch (selectedOption) {
-          case 'Productos':
-            endpoint = 'products';
-            setNumber(0);
-            break;
-          case 'Clientes':
-            endpoint = 'customers';
-            setNumber(1);
-            break;
-          case 'Vehiculos':
-            endpoint = 'vehicles';
-            setNumber(2);
-            break;
-          case 'Ventas':
-            endpoint = 'sales';
-            setNumber(3);
-            break;
-          case 'Pendientes':
-            endpoint = 'schedules';
-            setNumber(4);
-            break;
-          case 'Movimientos':
-            endpoint = 'inventory-movements';
-            setNumber(5);
-            break;
+        default:
+          throw new Error(`Opción no válida: ${selectedOption}`);
+      }
+      
 
-          default:
-            throw new Error(`Opción no válida: ${selectedOption}`);
+      const response = await fetch(`${API_URL}/${endpoint}/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,  // Corregido 'Authorization'
         }
-        
+      });
 
-        const response = await fetch(`${API_URL}/${endpoint}/`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,  // Corregido 'Authorization'
-          }
-        });
+      if (!response.ok) {
+        throw new Error(`Error al obtener los ${selectedOption.toLowerCase()}: ${response.statusText}`);
+      }
 
-        if (!response.ok) {
-          throw new Error(`Error al obtener los ${selectedOption.toLowerCase()}: ${response.statusText}`);
-        }
-
-        const result = await response.json();  // Convierte la respuesta en JSON
-        if (selectedOption === 'Pendientes') {
-          const updatedResult = await Promise.all(
-            result.filter(item => item.state === "Pendiente").map(async (item) => {
-              try {
-                const serviciosArray = JSON.parse(item.servicios);
-                const responseCustomer = await fetch(`${API_URL}/customers/${item.customer_id}`, {
-                  headers: {
-                    'Authorization': `Bearer ${token}`,
-                  }
-                });
-                const responseVehicle = await fetch(`${API_URL}/vehicles/${item.vehicle_id}`, {
-                  headers: {
-                    'Authorization': `Bearer ${token}`,
-                  }
-                });
-                const resultVehicle = await responseVehicle.json();
-                const customerPlate = resultVehicle.plate;
-                const resultCustomer = await responseCustomer.json();
-                const CustomerName = resultCustomer.name;
-                if (Array.isArray(serviciosArray)) {
-                  return { ...item, servicios: serviciosArray, customer_id: CustomerName, vehicle_id: customerPlate };
-                } else {
-                  console.error('Servicios no es un array:', item.servicios);
-                  return item;
-                }
-              } catch (e) {
-                console.error('Error al parsear servicios:', item.servicios, e);
-                return item;
-              }
-            })
-          );
-          setData(updatedResult);
-        } else {
-          setData(result);
-        }
-        console.log(result);
-        if(selectedOption === 'Ventas'){
-          const customerNames = {};
-          const invoiceNumbers = {};
-          await Promise.all(result.map(async (item) => {
-            if(!invoiceNumbers[item.id]){
-              const response = await fetch(`${API_URL}/invoices/${item.id}/`, {
+      const result = await response.json();  // Convierte la respuesta en JSON
+      if (selectedOption === 'Pendientes') {
+        const updatedResult = await Promise.all(
+          result.filter(item => item.state === "Pendiente").map(async (item) => {
+            try {
+              const serviciosArray = JSON.parse(item.servicios);
+              const responseCustomer = await fetch(`${API_URL}/customers/${item.customer_id}`, {
                 headers: {
                   'Authorization': `Bearer ${token}`,
                 }
               });
-              const resultInvoice = await response.json();
-              invoiceNumbers[item.id] = resultInvoice[0].invoice_number;
-              
-            }
-
-            if(!customerNames[item.customer_id]){
-              const response = await fetch(`${API_URL}/customers/${item.customer_id}/`, {
-                headers: { 
+              const responseVehicle = await fetch(`${API_URL}/vehicles/${item.vehicle_id}`, {
+                headers: {
                   'Authorization': `Bearer ${token}`,
                 }
               });
-              const resultCustomer = await response.json();
-              customerNames[item.customer_id] = resultCustomer.name;
+              const resultVehicle = await responseVehicle.json();
+              const customerPlate = resultVehicle.plate;
+              const resultCustomer = await responseCustomer.json();
+              const CustomerName = resultCustomer.name;
+              if (Array.isArray(serviciosArray)) {
+                return { ...item, servicios: serviciosArray, customer_id: CustomerName, vehicle_id: customerPlate };
+              } else {
+                console.error('Servicios no es un array:', item.servicios);
+                return item;
+              }
+            } catch (e) {
+              console.error('Error al parsear servicios:', item.servicios, e);
+              return item;
             }
-          }));
-          setCustomerName(customerNames);
-          setInvoiceNumber(invoiceNumbers);
-        
-        }
-      } catch (error) {
-        console.error(`Error al obtener los ${selectedOption.toLowerCase()}:`, error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
+          })
+        );
+        setData(updatedResult);
+      } else {
+        setData(result);
       }
-    };
+      console.log(result);
+      if(selectedOption === 'Ventas'){
+        const customerNames = {};
+        const invoiceNumbers = {};
+        await Promise.all(result.map(async (item) => {
+          if(!invoiceNumbers[item.id]){
+            const response = await fetch(`${API_URL}/invoices/${item.id}/`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              }
+            });
+            const resultInvoice = await response.json();
+            invoiceNumbers[item.id] = resultInvoice[0].invoice_number;
+            
+          }
+
+          if(!customerNames[item.customer_id]){
+            const response = await fetch(`${API_URL}/customers/${item.customer_id}/`, {
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+              }
+            });
+            const resultCustomer = await response.json();
+            customerNames[item.customer_id] = resultCustomer.name;
+          }
+        }));
+        setCustomerName(customerNames);
+        setInvoiceNumber(invoiceNumbers);
+      
+      }
+    } catch (error) {
+      console.error(`Error al obtener los ${selectedOption.toLowerCase()}:`, error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    
+    
 
     fetchData();
   }, [selectedOption, token]);  // Añadido 'token' al array de dependencias de useEffect
@@ -355,8 +355,9 @@ const LookDetail = ({ selectedOption, searchTerm, setNumber }) => {
               </button>
               <Modalmini show={isModalOpen} onClose={closeModal} >
                 <div className='flex flex-col justify-center items-center h-full w-full '>
-                    <div className='font-bold text-2xl justify-center items-center flex h-1/10'>
+                    <div className='font-bold text-2xl justify-center items-center flex flex-col h-1/10'>
                         <h1 >MODIFICAR PRODUCTO</h1>
+                        <h2>{productUpdate.name}</h2>
                     </div>
                     <div className='flex flex-col justify-center items-center h-8/10 space-y-5 w-full' >
                         <div className='flex w-full'>

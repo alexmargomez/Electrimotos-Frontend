@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import DateTimeDisplay from '../components/DateTimeDisplay';
 import DatesRegister from '../components/DatesRegister';
+import Ready from '../components/Ready';
 
 const Schedule = () => {
   const API_URL = import.meta.env.VITE_API_URL;
+  const [showModal, setShowModal] = useState(false);
   const token = localStorage.getItem('authToken');
   const [services, setServices] = useState([]);
   const [serviceInput, setServiceInput] = useState('');
@@ -19,7 +21,7 @@ const Schedule = () => {
     make: '',
     model: ''
   });
-  const [clientData, setClientData] = useState([]); // Estado para almacenar los datos completos de los clientes
+  const [clientData, setClientData] = useState([]); 
   const [vehicleData, setVehicleData] = useState([]); 
 
   const addService = () => {
@@ -113,7 +115,7 @@ const Schedule = () => {
               "state": "Pendiente",
             }),
           });
-          alert('Agendamiento actualizado exitosamente'); 
+          
         }else{
           const scheduleResponse = await fetch(`${API_URL}/schedules/`, {
             method: 'POST',
@@ -151,14 +153,17 @@ const Schedule = () => {
           console.error('Error response data:', errorData);
           throw new Error('Error creando el agendamiento');
         }
-        alert('Agendamiento creado exitosamente'); 
+        
       }
-
-      window.location.reload();
+      setShowModal(true);
     } catch (error) {
       console.error('Error creando el agendamiento:', error);
       alert(error.message);
     }
+  };
+  const handleCloseModal = () => {
+    setShowModal(false);
+    window.location.reload();
   };
 
   return (
@@ -167,7 +172,7 @@ const Schedule = () => {
         <h1 className="text-left font-bold text-gray-600">AGENDAMIENTO</h1>
         <DateTimeDisplay className="flex justify-between" />
       </div>
-      <div className="p-5 m-4 h-full bg-white rounded-sm shadow-xl mt-0 border-t-3 border-[#FFD700]">
+      <div className={`p-5 m-4 h-full bg-white rounded-sm shadow-xl mt-0 border-t-3 border-[#FFD700] ${showModal ? 'animate-border' : ''}`}>
         <div className="flex flex-wrap h-full w-full justify-center items-center">
           <section className="h-3/11 w-full flex shadow-2xl mb-2 rounded-lg">
             <DatesRegister 
@@ -234,6 +239,7 @@ const Schedule = () => {
             >
               Agendar
             </button>
+            <Ready show={showModal} onClose={handleCloseModal} Date="AGENDADOS"/>
           </section>
         </div>
       </div>
