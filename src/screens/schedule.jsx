@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react';
 import DateTimeDisplay from '../components/DateTimeDisplay';
 import DatesRegister from '../components/DatesRegister';
 import Ready from '../components/Ready';
+import DatesWorker from '../services/DatesWorker';
+import { FaPlus } from "react-icons/fa6";
+
 
 const Schedule = () => {
   const API_URL = import.meta.env.VITE_API_URL;
-  const [showModal, setShowModal] = useState(false);
   const token = localStorage.getItem('authToken');
+  const [showModal, setShowModal] = useState(false);
+  const [worker, setWorker] = useState([]);
+  const [selectedWorker, setSelectedWorker] = useState('')
   const [services, setServices] = useState([]);
   const [serviceInput, setServiceInput] = useState('');
   const [clientValues, setClientValues] = useState({
@@ -38,8 +43,9 @@ const Schedule = () => {
   const handleSchedule = async (clientValues, vehicleValues) => {
     let customerId = clientValues.id;
     let vehicleId = vehicleValues.id;
-    
-    const existingClient = clientData.find(client => client.id.toString() === customerId);
+    console.log('customerId:', customerId);
+    console.log('vehicleId:', vehicleId);
+    const existingClient = clientData.find(client => client.id === customerId);
     
     if (!existingClient) {
       const cliente = await fetch(`${API_URL}/customers/`, {
@@ -49,7 +55,6 @@ const Schedule = () => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          "id": clientValues.id,
           "name": clientValues.name,
           "phone": clientValues.phone,
           "email": clientValues.email,
@@ -98,6 +103,8 @@ const Schedule = () => {
         },
       });
       const response= await scheduleExists.json();
+      console.log('responseDatos:', response.length);
+      console.log('select:', selectedWorker);
       if(response.length > 0){
         const responsePendiente = response.find(schedule => schedule.state === "Pendiente" );
         
@@ -113,6 +120,7 @@ const Schedule = () => {
             body: JSON.stringify({
               "servicios": services,
               "state": "Pendiente",
+              "worker_id": selectedWorker,
             }),
           });
           
@@ -128,6 +136,8 @@ const Schedule = () => {
               "customer_id": customerId,
               "servicios": services,
               "state": "Pendiente",
+              "worker_id": selectedWorker,
+              
             }),
           });
           alert('Agendamiento creado exitosamente');
@@ -145,6 +155,7 @@ const Schedule = () => {
             "customer_id": customerId,
             "servicios": services,
             "state": "Pendiente",
+            "worker_id": selectedWorker,
           }),
         });
   
@@ -162,9 +173,18 @@ const Schedule = () => {
     }
   };
   const handleCloseModal = () => {
+    console.log('Cerrando modal');
     setShowModal(false);
     window.location.reload();
   };
+  // Llamar al servicio que obtiene los empleados
+  DatesWorker(API_URL, token, setWorker);
+
+  const handleChange = (e) => {
+    setSelectedWorker(e.target.value); // Guardar el ID seleccionado en el estado
+  };
+
+  const newWindow = () => window.open(window.location.href, '_blank' );
 
   return (
     <div className="h-screen w-full flex flex-col bg-gray-200">
@@ -173,22 +193,43 @@ const Schedule = () => {
         <DateTimeDisplay className="flex justify-between" />
       </div>
       <div className={`p-5 m-4 h-full bg-white rounded-sm shadow-xl mt-0 border-t-3 border-[#FFD700] ${showModal ? 'animate-border' : ''}`}>
+        
         <div className="flex flex-wrap h-full w-full justify-center items-center">
-          <section className="h-3/11 w-full flex shadow-2xl mb-2 rounded-lg">
+          <div onClick={newWindow} className='absolute right-10 top-15 m-2 cursor-pointer bg-[#023047] text-white rounded-full p-2'>
+            <FaPlus />
+          </div>
+          <section className="h-3/11 w-full flex flex-col shadow-2xl mb-2 rounded-lg">
             <DatesRegister 
               token={token}
               API_URL={API_URL}
+              pent={setSelectedWorker}
               setClientData={setClientData}
               setVehicleData={setVehicleData}
               setClientValues={setClientValues}
               setVehicleValues={setVehicleValues}
               setServices={setServices} // Asegurarse de pasar setServices correctamente
             />
+            <div className='flex justify-center items-center w-full space-x-2'>
+              <h2 className="text-lg font-bold text-[#023047]">Empleado: </h2>
+              <select 
+                name="worker" 
+                id="worker"
+                value={selectedWorker}  // Sincronizar el estado
+                onChange={handleChange}
+              >
+                <option value="">Seleccionar empleado: </option>
+                {worker.map((worker) => (
+                  <option key={worker.id} value={worker.id}>
+                    {worker.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </section>
           {/* Servicios */}
           <section className="flex w-full h-7/11 space-x-2">
-            <div className="flex flex-col justify-center items-center w-1/2 h-full border-2 border-[#494A8A] rounded-sm">
-              <div className="flex h-1/10 space-x-10 bg-[#494A8A] w-full justify-center items-center">
+            <div className="flex flex-col justify-center items-center w-1/2 h-full border-2 border-[#023047] rounded-sm">
+              <div className="flex h-1/10 space-x-10 bg-[#023047] w-full justify-center items-center">
                 <h2 className="text-white text-2xl">Servicios</h2>
               </div>
               <div className="flex flex-col items-center justify-center p-4 space-y-5 h-9/10 w-full">
@@ -209,8 +250,8 @@ const Schedule = () => {
             </div>
 
             {/* Servicios Agregados */}
-            <div className="w-1/2 h-full border-2 border-[#494A8A] rounded-sm">
-              <div className="flex h-1/10 bg-[#494A8A] justify-center items-center">
+            <div className="w-1/2 h-full border-2 border-[#023047] rounded-sm">
+              <div className="flex h-1/10 bg-[#023047] justify-center items-center">
                 <h2 className="text-white text-2xl">Servicios Agregados</h2>
               </div>
               <div className="flex flex-col flex-grow h-9/10 overflow-hidden">

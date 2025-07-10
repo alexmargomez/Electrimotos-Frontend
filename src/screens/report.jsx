@@ -1,4 +1,4 @@
-import React from 'react'
+
 import DateTimeDisplay from '../components/DateTimeDisplay';
 
 const Report = () => {

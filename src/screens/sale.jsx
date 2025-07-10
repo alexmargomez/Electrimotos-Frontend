@@ -1,15 +1,18 @@
 import React from 'react'
 import DateTimeDisplay from '../components/DateTimeDisplay';
-import { useState, useEffect } from 'react';
+import { useState , useEffect } from 'react';
 import LookProduct from '../components/LookProduct';  
 import DatesRegister from '../components/DatesRegister';
 import FactuPrint from '../components/FactuPrint';
 import Ready from '../components/Ready';
+import DatesWorker from '../services/DatesWorker';
 
 const Sale = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('authToken');
   const [showModal, setShowModal] = useState(false);
+  const [worker, setWorker] = useState(null);
+  const [datesWorker, setDatesWorker] = useState([]);
   const [invoices, setInvoices] = useState(null);
   const [PrintId, setPrintId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -104,8 +107,9 @@ const Sale = () => {
   const handleInovice = async (clientValues, vehicleValues) => {
     let customerId = clientValues.id;
     let vehicleId = vehicleValues.id;
+    let totalservicio = 0;
     console.log('vehicleId:', vehicleId);
-    const existingClient = clientData.find(client => client.id.toString() === customerId);
+    const existingClient = clientData.find(client => client.id === customerId);
     
     if (!existingClient) {
       const cliente = await fetch(`${API_URL}/customers/`, {
@@ -115,7 +119,6 @@ const Sale = () => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          "id": clientValues.id,
           "name": clientValues.name,
           "phone": clientValues.phone,
           "email": clientValues.email,
@@ -128,7 +131,6 @@ const Sale = () => {
       }
       
     }
-    
     try {
 
       const vehicleExists = vehicleData.find(vehicle => vehicle.id === vehicleValues.id);
@@ -167,7 +169,6 @@ const Sale = () => {
         const responsePendiente = response.find(schedule => schedule.state === "Pendiente");
         
         if(responsePendiente){
-          console.log('responsePendiente:', responsePendiente);
           const scheduleResponse = await fetch(`${API_URL}/schedules/${responsePendiente.id}`,{
             method: 'PUT',
             headers: {
@@ -176,6 +177,7 @@ const Sale = () => {
             },
             body: JSON.stringify({
               "servicios": services,
+              "worker_id": worker,
               "state": "Completado",
             }),
           });
@@ -195,6 +197,7 @@ const Sale = () => {
           "payment_method": "Efectivo",
         }),
       });
+      
       if (!saleCreate.ok) {
         const errorData = await saleCreate.json();
         console.error('Error response data:', errorData);
@@ -207,7 +210,6 @@ const Sale = () => {
         setVehicleID(vehicleId); // Actualiza el estado con el id del vehículo
 
         for (const product of productsDate) {
-          
           const saleDetail = await fetch(`${API_URL}/sale-details/`, {
             method: 'POST',
             headers: {
@@ -247,8 +249,11 @@ const Sale = () => {
             const errorData = await serviceCreate.json();
             console.error('Error response data:', errorData);
             throw new Error('Error creando el servicio');
+          }else{
+            totalservicio += service.price;
           }
         }
+        //creación factura
         const invoiceSale = await fetch(`${API_URL}/invoices/`, {
           method: 'POST',
           headers: {
@@ -267,6 +272,26 @@ const Sale = () => {
           const invoiceData = await invoiceSale.json();
           setInvoices(invoiceData.id);
         }
+
+        if(worker){
+          const workerSale = await fetch(`${API_URL}/workers/${worker}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              "totalDia": totalservicio,
+            }),
+          });
+          if (!workerSale.ok) {
+            const errorData = await workerSale.json();
+            console.error('Error response data:', errorData);
+            throw new Error('Error actualizando el total del trabajador');
+          }
+        }
+        
+        
       }
     setShowModal(true); 
     }catch (error) {
@@ -282,7 +307,10 @@ const Sale = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
+    window.location.reload();
   };
+  //Llamado al servicio para obtener los empleados
+  DatesWorker(API_URL, token, setDatesWorker);
 
   return (
     <div className='h-screen w-full flex flex-col bg-gray-200'>
@@ -292,22 +320,25 @@ const Sale = () => {
       </div>
       <div className={`p-5 m-4 h-full bg-white rounded-sm shadow-xl mt-0 border-t-3 border-[#FFD700]  flex flex-wrap ${showModal ? 'animate-border' : ''}`}>
 
-      <section className='h-3/11 w-full flex shadow-2xl mb-2 rounded-lg'>
+      <section className='h-3/11 w-full flex flex-col shadow-2xl mb-2 rounded-lg'>
         <DatesRegister 
             token={token}
             API_URL={API_URL}
+            pent={setWorker}
             setClientData={setClientData}
             setVehicleData={setVehicleData}
             setClientValues={setClientValues}
             setVehicleValues={setVehicleValues}
             setServices={setServicesDate} 
-            
-          />
+        />
+        <div>
+          <h2 className='text-gray-500'> Empleado: {datesWorker[worker - 1]?.name || "Sin empleado asignado "}</h2>
+        </div>
       </section>
 
         <section className='flex justify-center items-center w-full h-7/11 space-x-2 '> {/*Busqueda de producto o servicio y factura*/}
-          <div className='w-1/2 h-full border-2 border-[#494A8A] rounded-sm'> {/*Busqueda de producto o servicio*/}
-            <div className='flex h-1/10 bg-[#494A8A] '> {/*Barra de busqueda*/}
+          <div className='w-1/2 h-full border-2 border-[#023047] rounded-sm'> {/*Busqueda de producto o servicio*/}
+            <div className='flex h-1/10 bg-[#023047] '> {/*Barra de busqueda*/}
               <div 
                 className={`px-4 py-2 cursor-pointer w-1/2 flex justify-end items-center border-r-2 border-white rounded-tl-sm ${activeTab === 'producto' ? 'bg-white text-[#494A8A]' : 'hover:bg-white hover:text-[#494A8A] text-white'}`}
                 onClick={() => handleTabClick('producto')}
@@ -365,8 +396,8 @@ const Sale = () => {
               )}
             </div>
           </div>
-          <div className='w-1/2 h-full border-2 border-[#494A8A] rounded-sm'> {/*Factura*/}
-            <div className='flex justify-center items-center h-1/10  space-x-10 bg-[#494A8A] '>
+          <div className='w-1/2 h-full border-2 border-[#023047] rounded-sm'> {/*Factura*/}
+            <div className='flex justify-center items-center h-1/10  space-x-10 bg-[#023047] '>
               <h2 className='text-white text-2xl'>Facturación</h2>
             </div>
             <div className='flex flex-col items-center justify-baseline p-4 space-y-2  h-9/10 w-full overflow-y-auto max-h-[400px]'>
@@ -427,8 +458,8 @@ const Sale = () => {
         <section className=' h-1/11 flex w-full pt-2 '> {/*Total y botones de facturar y cancelar*/}
           
           <div className='h-full w-1/2 flex justify-end items-center pr-6'>
-            <h3 className='text-[#494A8A] text-5xl font-extrabold pr-3'>Total: </h3>
-            <h3 className='text-[#494A8A] text-5xl font-extrabold'>$ {formatPrice(total)}</h3>
+            <h3 className='text-[#023047] text-5xl font-extrabold pr-3'>Total: </h3>
+            <h3 className='text-[#023047] text-5xl font-extrabold'>$ {formatPrice(total)}</h3>
           </div>
           
           <button
@@ -439,10 +470,9 @@ const Sale = () => {
             }}
           >
             Facturar
-          </button>
+          </button>|
           {PrintId && (
               <>
-                
                 <FactuPrint id={invoices} />
                 <Ready show={showModal} onClose={handleCloseModal} Date="FACTURADO"/>
               </>

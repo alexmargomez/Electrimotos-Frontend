@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClientValues, setVehicleValues, setServices}) => {
+const DatesRegister = ({pent, token, API_URL, setClientData, setVehicleData, setClientValues, setVehicleValues, setServices}) => {
   const [clientValues, updateClientValues] = useState({
     name: '',
-    id: '',
     phone: '',
     email: ''
   });
   const [clientOptions, setClientOptions] = useState({
     name: [],
-    id: [], 
     phone: [],
     email: []
   });
@@ -36,8 +34,8 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
         });
         const result = await response.json();
         const clientOpts = {
-          name: result.map(client => client.name),
           id: result.map(client => client.id),
+          name: result.map(client => client.name),          
           phone: result.map(client => client.phone),
           email: result.map(client => client.email)
         };
@@ -73,7 +71,7 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
   useEffect(() => {
     const flVehicles = async () => {
       if (clientValues.id) {
-        const filterVehicles = vehicleData.filter(vehicle => vehicle.customer_id.toString() === clientValues.id);
+        const filterVehicles = vehicleData.filter(vehicle => vehicle.customer_id === clientValues.id);
         const vehicleOpts = {
           id: filterVehicles.map(vehicle => vehicle.id),
           plate: filterVehicles.map(vehicle => vehicle.plate),
@@ -84,7 +82,6 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
 
         console.log('clientoptions:', vehicleOpts);
 
-        
         const response = await fetch(`${API_URL}/schedules/${clientValues.id}`, {
           headers: {
                 'Authorization': `Bearer ${token}`,
@@ -95,6 +92,8 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
         if (result.length > 0) {
           const schedulePendiente = result.find(schedule => schedule.state === "Pendiente");
           if (schedulePendiente) {
+            pent(schedulePendiente.worker_id);
+            console.log('Pendiente:', schedulePendiente.worker_id);
             const vehicle = vehicleData.find(vehicle => vehicle.id === schedulePendiente.vehicle_id);
             if (vehicle) {
               updateVehicleValues({
@@ -153,18 +152,18 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
   const handleClientChange = (field, value) => {
     updateClientValues(prev => ({ ...prev, [field]: value }));
     setClientValues(prev => ({ ...prev, [field]: value }));
-    if (field === 'id' || field === 'name') {
+    if ( field === 'name') {
       const client = clientData.find(client => client[field].toString() === value.toString());
       if (client) {
         updateClientValues({
           name: client.name,
-          id: client.id.toString(),
+          id: client.id,
           phone: client.phone.toString(),
           email: client.email,
         });
         setClientValues({
           name: client.name,
-          id: client.id.toString(),
+          id: client.id,
           phone: client.phone.toString(),
           email: client.email,
         });
@@ -173,12 +172,13 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
   };
 
   return (
-    <>
+    <div className='flex'>
       <div className="w-1/2 flex flex-col">
-        <h2 className="text-2xl h-1/4 p-3 text-[#494A8A] font-bold">Cliente</h2>
+        <h2 className="text-2xl h-1/4 p-3 text-[#023047] font-bold">Cliente</h2>
         <div className="h-3/4 pl-10 pr-10 flex flex-col justify-center items-center pb-5">
           {Object.keys(clientValues).map((field, index) => (
             <div key={index} className="relative w-full">
+              {field !== 'id' && (
               <input
                 type={field === "email" ? "email" : "text"}
                 placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
@@ -188,6 +188,7 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
                 onInput={(e) => handleClientChange(field, e.target.value)}
                 className="w-full border-b-1 border-gray-500 outline-none placeholder-gray-500 pl-1"
               />
+              )}
               <datalist id={field}>
                 {clientOptions[field].map((option, id) => (
                   <option key={id} value={option} />
@@ -200,7 +201,7 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
       
       {/* Datos del Vehículo */}
       <div className="w-1/2">
-        <h2 className="text-2xl h-1/4 p-3 text-[#494A8A] font-bold">Vehículo</h2>
+        <h2 className="text-2xl h-1/4 p-3 text-[#023047] font-bold">Vehículo</h2>
         <div className="h-3/4 pl-10 pr-10 flex flex-col justify-center items-center pb-5">
         {Object.keys(vehicleValues).map((field, index) => (
             <div key={index} className="relative w-full">
@@ -224,7 +225,7 @@ const DatesRegister = ({ token, API_URL, setClientData, setVehicleData, setClien
         ))}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

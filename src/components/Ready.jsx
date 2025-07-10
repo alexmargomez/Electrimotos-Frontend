@@ -15,7 +15,7 @@ const ModalReady = ({ show, onClose, Date }) => {
       window.addEventListener('keydown', handleEsc);
       timer = setTimeout(() => {
         onClose();
-      }, 1000);
+      }, 2000);
       
        // Cerrar el modal después de 2 segundos
     }

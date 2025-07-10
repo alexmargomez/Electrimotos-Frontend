@@ -6,6 +6,7 @@ const FactuPrint = ({ id }) => {
 
   useEffect(() => {
     console.log('FactuPrint:', id);
+
     const fetchInvoices = async () => {
       try {
         const response = await fetch(`${API_URL}/invoices/pdf/${id}`, {
@@ -20,27 +21,36 @@ const FactuPrint = ({ id }) => {
 
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `invoice_${id}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
 
-        // Abrir el PDF en una nueva ventana emergente
+        // Verificar si la ventana fue bloqueada por el navegador
         const printWindow = window.open('', '_blank', 'width=800,height=600');
-        printWindow.document.write(
-          `<iframe src="${url}" frameborder="0" style="border:0; width:100%; height:100%;" allowfullscreen></iframe>`
-        );
-        printWindow.document.close();
+        if (printWindow) {
+          // Usar una bandera para evitar la doble ejecución de "onload"
+          let printed = false;
 
-        printWindow.addEventListener('load', () => {
-          printWindow.print();
-        });
+          printWindow.document.write(
+            `<iframe src="${url}" frameborder="0" style="border:0; width:100%; height:100%;" allowfullscreen></iframe>`
+          );
+          printWindow.document.close();
+
+          printWindow.onload = () => {
+            if (!printed) {
+              printWindow.print(); // Imprimir una vez
+              printed = true; // Evitar futuras impresiones duplicadas
+
+              setTimeout(() => {
+                printWindow.close(); // Cerrar después de imprimir
+              }, 1000); // Esperar un segundo antes de cerrar
+            }
+          };
+        } else {
+          console.error('No se pudo abrir la ventana de impresión.');
+        }
       } catch (error) {
         console.error('Error fetching invoice:', error);
       }
     };
+
     fetchInvoices();
   }, [id, token, API_URL]);
 

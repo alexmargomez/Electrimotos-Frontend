@@ -77,6 +77,7 @@ const LookProduct = ({ addProduct, searchTerm  }) => {
               Agregar
             </button>
             
+            
           </div>
         </div>
       ))}

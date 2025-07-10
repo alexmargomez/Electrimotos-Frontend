@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { useState, useEffect} from  "react";
 import LookDetail from '../components/LookDetail';
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
